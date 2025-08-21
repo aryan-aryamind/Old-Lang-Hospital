@@ -1,0 +1,137 @@
+{
+  "long_term_memory": [
+    {
+<<<<<<< HEAD
+      "user_input": "I want to know which automatic doctors are available. Just",
+      "ai_response": "It seems there might be a slight misunderstanding. Shalby Hospitals does not have \"automatic doctors.\" However, we have a wide range of highly skilled and experienced doctors across various specialties to provide comprehensive care.\n\nOur Centers of Excellence cover a broad spectrum of medical fields, including:\n\n*   **Bone and Joint:** Specializing in joint replacements (knee/hip), trauma, spine surgery, and arthroscopy.\n*   **Cardiac Sciences:** For interventional cardiology, angioplasty, and cardiac surgery.\n*   **Gastro Sciences:** Including liver transplantation, obesity surgery, and endoscopy.\n*   **Kidney Sciences:** For nephrology, urology, kidney transplants, and dialysis.\n*   **Neuro Sciences:** Covering neurology, neurosurgery, and stroke treatment.\n*   **Onco Sciences:** Offering surgical, medical, and radiation oncology.\n*   **Obstetrics and Gynecology:** For comprehensive women's healthcare.\n\nAdditionally, we have specialists in Dental Cosmetic and Implantology, Emergency Medicine, ENT Surgery, Dermatology, Ophthalmology, Pediatrics, Pulmonology, and Critical Care.\n\nIf you could tell me more about the medical condition or specialty you are interested in, I can guide you to the appropriate department or doctor at Shalby Hospitals.",
+      "timestamp": "2025-08-06T17:00:31.085115"
+    },
+    {
+      "user_input": "I want to know which orthopedic doctor are available.",
+      "ai_response": "Shalby Hospitals is a global leader in orthopedics, particularly renowned for joint replacement surgeries. We have a team of highly skilled and experienced orthopedic doctors.\n\nOur founder and Chairman & Managing Director, **Dr. Vikram Shah**, is a globally recognized orthopedic surgeon, especially known for pioneering the \"Zero Technique\" in minimally invasive joint replacements.\n\nBeyond Dr. Shah, our Bone and Joint Center of Excellence comprises many expert orthopedic specialists covering a wide range of services, including:\n*   Joint replacements (knee, hip, shoulder)\n*   Trauma and fracture management\n*   Spine surgery\n*   Arthroscopy and sports injuries\n\nTo help you find the most suitable orthopedic doctor for your specific needs, please feel free to provide more details about your condition or the type of orthopedic consultation you are seeking.\n\nYou can also contact us directly for assistance with appointments or further information:\n*   **Phone:** +91 7069001001, +91 95120 06886\n*   **Email:** info@shalby.org",
+      "timestamp": "2025-08-06T17:06:31.895378"
+    },
+    {
+      "user_input": "The best doctor of the hospital.",
+      "ai_response": "Shalby Hospitals is home to a team of highly skilled and experienced doctors across all our specialties. While \"best\" can be subjective and depend on your specific medical needs, our founder and Chairman & Managing Director, **Dr. Vikram Shah**, is globally renowned, especially for his pioneering work in joint replacement surgeries, including the innovative \"Zero Technique.\"\n\nShalby's Centers of Excellence feature many leading specialists in their respective fields, ensuring you receive exceptional care.\n\nIf you could share more about the medical condition or specialty you are interested in, I can help guide you to the most appropriate doctor or department at Shalby Hospitals.",
+      "timestamp": "2025-08-06T17:34:36.132050"
+    },
+    {
+      "user_input": "I want to know which neurology doctors are available.",
+      "ai_response": "Shalby Hospitals has a dedicated **Neuro Sciences Center of Excellence**, offering comprehensive care for neurological conditions. This center is staffed by a team of highly skilled and experienced neurology doctors and neurosurgeons.\n\nOur Neuro Sciences department provides services for a wide range of conditions, including:\n*   Neurology consultations\n*   Neurosurgery\n*   Stroke treatment and management\n\nWhile I cannot provide individual doctor names at this moment, rest assured that our team of neurologists and neurosurgeons are experts in their field, committed to providing the best possible care.\n\nTo find the most suitable neurology doctor for your specific needs or to schedule an appointment, please contact us directly:\n*   **Phone:** +91 7069001001, +91 95120 06886\n*   **Email:** info@shalby.org",
+      "timestamp": "2025-08-07T11:54:45.558669"
+    },
+    {
+      "user_input": "I want to book an appointment doctor.",
+      "ai_response": "Certainly! We can help you book an appointment with a doctor at Shalby Hospitals.\n\nTo book an appointment, please contact us directly using the following details. Our team will assist you in scheduling with the most suitable doctor based on your medical needs and preferred specialty:\n\n*   **Phone:** +91 7069001001, +91 95120 06886\n*   **Email:** info@shalby.org\n\nWhen you contact us, please let us know if you have a specific doctor in mind or if you need assistance in a particular specialty (e.g., Orthopedics, Neurology, Cardiac Sciences, etc.). We look forward to assisting you.",
+      "timestamp": "2025-08-07T11:56:36.599357"
+    },
+    {
+      "user_input": "I want to know orthopedic doctors are available or not.",
+      "ai_response": "Yes, Shalby Hospitals has a very strong and renowned team of orthopedic doctors available. In fact, **Bone and Joint** is one of our primary Centers of Excellence, and we are globally recognized as a leader in joint replacement surgeries (knee/hip), trauma, spine surgery, and arthroscopy.\n\nOur founder, **Dr. Vikram Shah**, is particularly renowned for his pioneering work in joint replacement surgeries, including the innovative \"Zero Technique.\"\n\nTo book an appointment with an orthopedic doctor or to learn more about our specialists in this field, please contact us directly:\n\n*   **Phone:** +91 7069001001, +91 95120 06886\n*   **Email:** info@shalby.org",
+      "timestamp": "2025-08-20T17:18:37.767584"
+    },
+    {
+      "user_input": "I want to book a neurology doctor.",
+      "ai_response": "Certainly! We can help you book an appointment with a neurology doctor at Shalby Hospitals.\n\nShalby Hospitals has a dedicated **Neuro Sciences Center of Excellence** with highly skilled and experienced neurology doctors who can provide comprehensive care.\n\nTo book an appointment with a neurology doctor, please contact us directly using the details below. Our team will assist you in scheduling with the most suitable doctor for your needs:\n\n*   **Phone:** +91 7069001001, +91 95120 06886\n*   **Email:** info@shalby.org\n\nWe look forward to assisting you.",
+      "timestamp": "2025-08-20T17:53:13.559751"
+    },
+    {
+      "user_input": "Ah\u00ed want to book a doctor up one time, sir.",
+      "ai_response": "Certainly! We can help you book an appointment with a doctor at Shalby Hospitals.\n\nAs mentioned before, to book an appointment, please contact us directly using the following details. Our team will assist you in scheduling with the most suitable doctor based on your medical needs and preferred specialty:\n\n*   **Phone:** +91 7069001001, +91 95120 06886\n*   **Email:** info@shalby.org\n\nWe look forward to assisting you with your appointment booking.",
+      "timestamp": "2025-08-20T17:53:33.668217"
+    },
+    {
+      "user_input": "I want to know about neurology doctors.",
+      "ai_response": "Shalby Hospitals has a dedicated **Neuro Sciences Center of Excellence** with highly skilled and experienced neurology doctors.\n\nOur neurology specialists provide comprehensive care, including neurology, neurosurgery, and stroke treatment.\n\nIf you wish to book an appointment or learn more about our neurology doctors, please contact us directly:\n\n*   **Phone:** +91 7069001001, +91 95120 06886\n*   **Email:** info@shalby.org",
+      "timestamp": "2025-08-21T10:54:19.753830"
+    },
+    {
+      "user_input": "I want to know about orthopedic doctors.",
+      "ai_response": "Shalby Hospitals is renowned globally for its **Bone and Joint Center of Excellence**, featuring highly skilled and experienced orthopedic doctors.\n\nWe are a global leader in joint replacements (knee/hip), and our specialists also excel in trauma, spine surgery, and arthroscopy. Our Chairman and Managing Director, Dr. Vikram Shah, is the innovator behind the \"Zero Technique,\" a minimally invasive joint replacement method.\n\nIf you wish to book an appointment or learn more about our orthopedic doctors, please contact us directly:\n\n*   **Phone:** +91 7069001001, +91 95120 06886\n*   **Email:** info@shalby.org",
+      "timestamp": "2025-08-21T11:34:42.983610"
+    }
+  ],
+  "episodic_memory": {
+    "6cb4ddb9-86ab-4f17-9c40-6e0822d832d4": [
+      {
+        "user_input": "I want to know which automatic doctors are available. Just",
+        "ai_response": "It seems there might be a slight misunderstanding. Shalby Hospitals does not have \"automatic doctors.\" However, we have a wide range of highly skilled and experienced doctors across various specialties to provide comprehensive care.\n\nOur Centers of Excellence cover a broad spectrum of medical fields, including:\n\n*   **Bone and Joint:** Specializing in joint replacements (knee/hip), trauma, spine surgery, and arthroscopy.\n*   **Cardiac Sciences:** For interventional cardiology, angioplasty, and cardiac surgery.\n*   **Gastro Sciences:** Including liver transplantation, obesity surgery, and endoscopy.\n*   **Kidney Sciences:** For nephrology, urology, kidney transplants, and dialysis.\n*   **Neuro Sciences:** Covering neurology, neurosurgery, and stroke treatment.\n*   **Onco Sciences:** Offering surgical, medical, and radiation oncology.\n*   **Obstetrics and Gynecology:** For comprehensive women's healthcare.\n\nAdditionally, we have specialists in Dental Cosmetic and Implantology, Emergency Medicine, ENT Surgery, Dermatology, Ophthalmology, Pediatrics, Pulmonology, and Critical Care.\n\nIf you could tell me more about the medical condition or specialty you are interested in, I can guide you to the appropriate department or doctor at Shalby Hospitals.",
+        "timestamp": "2025-08-06T17:00:31.085115"
+      },
+      {
+        "user_input": "I want to know which orthopedic doctor are available.",
+        "ai_response": "Shalby Hospitals is a global leader in orthopedics, particularly renowned for joint replacement surgeries. We have a team of highly skilled and experienced orthopedic doctors.\n\nOur founder and Chairman & Managing Director, **Dr. Vikram Shah**, is a globally recognized orthopedic surgeon, especially known for pioneering the \"Zero Technique\" in minimally invasive joint replacements.\n\nBeyond Dr. Shah, our Bone and Joint Center of Excellence comprises many expert orthopedic specialists covering a wide range of services, including:\n*   Joint replacements (knee, hip, shoulder)\n*   Trauma and fracture management\n*   Spine surgery\n*   Arthroscopy and sports injuries\n\nTo help you find the most suitable orthopedic doctor for your specific needs, please feel free to provide more details about your condition or the type of orthopedic consultation you are seeking.\n\nYou can also contact us directly for assistance with appointments or further information:\n*   **Phone:** +91 7069001001, +91 95120 06886\n*   **Email:** info@shalby.org",
+        "timestamp": "2025-08-06T17:06:31.895378"
+      },
+      {
+        "user_input": "The best doctor of the hospital.",
+        "ai_response": "Shalby Hospitals is home to a team of highly skilled and experienced doctors across all our specialties. While \"best\" can be subjective and depend on your specific medical needs, our founder and Chairman & Managing Director, **Dr. Vikram Shah**, is globally renowned, especially for his pioneering work in joint replacement surgeries, including the innovative \"Zero Technique.\"\n\nShalby's Centers of Excellence feature many leading specialists in their respective fields, ensuring you receive exceptional care.\n\nIf you could share more about the medical condition or specialty you are interested in, I can help guide you to the most appropriate doctor or department at Shalby Hospitals.",
+        "timestamp": "2025-08-06T17:34:36.132050"
+      },
+      {
+        "user_input": "I want to know which neurology doctors are available.",
+        "ai_response": "Shalby Hospitals has a dedicated **Neuro Sciences Center of Excellence**, offering comprehensive care for neurological conditions. This center is staffed by a team of highly skilled and experienced neurology doctors and neurosurgeons.\n\nOur Neuro Sciences department provides services for a wide range of conditions, including:\n*   Neurology consultations\n*   Neurosurgery\n*   Stroke treatment and management\n\nWhile I cannot provide individual doctor names at this moment, rest assured that our team of neurologists and neurosurgeons are experts in their field, committed to providing the best possible care.\n\nTo find the most suitable neurology doctor for your specific needs or to schedule an appointment, please contact us directly:\n*   **Phone:** +91 7069001001, +91 95120 06886\n*   **Email:** info@shalby.org",
+        "timestamp": "2025-08-07T11:54:45.558669"
+      },
+      {
+        "user_input": "I want to book an appointment doctor.",
+        "ai_response": "Certainly! We can help you book an appointment with a doctor at Shalby Hospitals.\n\nTo book an appointment, please contact us directly using the following details. Our team will assist you in scheduling with the most suitable doctor based on your medical needs and preferred specialty:\n\n*   **Phone:** +91 7069001001, +91 95120 06886\n*   **Email:** info@shalby.org\n\nWhen you contact us, please let us know if you have a specific doctor in mind or if you need assistance in a particular specialty (e.g., Orthopedics, Neurology, Cardiac Sciences, etc.). We look forward to assisting you.",
+        "timestamp": "2025-08-07T11:56:36.599357"
+      },
+      {
+        "user_input": "I want to know orthopedic doctors are available or not.",
+        "ai_response": "Yes, Shalby Hospitals has a very strong and renowned team of orthopedic doctors available. In fact, **Bone and Joint** is one of our primary Centers of Excellence, and we are globally recognized as a leader in joint replacement surgeries (knee/hip), trauma, spine surgery, and arthroscopy.\n\nOur founder, **Dr. Vikram Shah**, is particularly renowned for his pioneering work in joint replacement surgeries, including the innovative \"Zero Technique.\"\n\nTo book an appointment with an orthopedic doctor or to learn more about our specialists in this field, please contact us directly:\n\n*   **Phone:** +91 7069001001, +91 95120 06886\n*   **Email:** info@shalby.org",
+        "timestamp": "2025-08-20T17:18:37.767584"
+      },
+      {
+        "user_input": "I want to book a neurology doctor.",
+        "ai_response": "Certainly! We can help you book an appointment with a neurology doctor at Shalby Hospitals.\n\nShalby Hospitals has a dedicated **Neuro Sciences Center of Excellence** with highly skilled and experienced neurology doctors who can provide comprehensive care.\n\nTo book an appointment with a neurology doctor, please contact us directly using the details below. Our team will assist you in scheduling with the most suitable doctor for your needs:\n\n*   **Phone:** +91 7069001001, +91 95120 06886\n*   **Email:** info@shalby.org\n\nWe look forward to assisting you.",
+        "timestamp": "2025-08-20T17:53:13.559751"
+      },
+      {
+        "user_input": "Ah\u00ed want to book a doctor up one time, sir.",
+        "ai_response": "Certainly! We can help you book an appointment with a doctor at Shalby Hospitals.\n\nAs mentioned before, to book an appointment, please contact us directly using the following details. Our team will assist you in scheduling with the most suitable doctor based on your medical needs and preferred specialty:\n\n*   **Phone:** +91 7069001001, +91 95120 06886\n*   **Email:** info@shalby.org\n\nWe look forward to assisting you with your appointment booking.",
+        "timestamp": "2025-08-20T17:53:33.668217"
+      },
+      {
+        "user_input": "I want to know about neurology doctors.",
+        "ai_response": "Shalby Hospitals has a dedicated **Neuro Sciences Center of Excellence** with highly skilled and experienced neurology doctors.\n\nOur neurology specialists provide comprehensive care, including neurology, neurosurgery, and stroke treatment.\n\nIf you wish to book an appointment or learn more about our neurology doctors, please contact us directly:\n\n*   **Phone:** +91 7069001001, +91 95120 06886\n*   **Email:** info@shalby.org",
+        "timestamp": "2025-08-21T10:54:19.753830"
+      },
+      {
+        "user_input": "I want to know about orthopedic doctors.",
+        "ai_response": "Shalby Hospitals is renowned globally for its **Bone and Joint Center of Excellence**, featuring highly skilled and experienced orthopedic doctors.\n\nWe are a global leader in joint replacements (knee/hip), and our specialists also excel in trauma, spine surgery, and arthroscopy. Our Chairman and Managing Director, Dr. Vikram Shah, is the innovator behind the \"Zero Technique,\" a minimally invasive joint replacement method.\n\nIf you wish to book an appointment or learn more about our orthopedic doctors, please contact us directly:\n\n*   **Phone:** +91 7069001001, +91 95120 06886\n*   **Email:** info@shalby.org",
+        "timestamp": "2025-08-21T11:34:42.983610"
+      }
+    ]
+  },
+  "current_session": "6cb4ddb9-86ab-4f17-9c40-6e0822d832d4"
+=======
+      "user_input": "Uh, I want to know which Orthopedics doctors are available.",
+      "ai_response": "Shalby Hospitals is globally recognized for its excellence in Bone and Joint care. Dr. Vikram Shah, the founder and Chairman & Managing Director of Shalby Hospitals, is a renowned orthopedic surgeon, particularly known for his innovative \"Zero Technique\" in joint replacement surgeries.\n\nAs a leading multispecialty hospital chain, Shalby Hospitals has a dedicated team of highly skilled orthopedic specialists for various procedures including joint replacements (knee/hip), trauma, spine surgery, and arthroscopy.\n\nTo find out about the specific orthopedic doctors available and their schedules, or to book an appointment, please contact Shalby Hospitals directly at +91 7069001001 or +91 95120 06886.",
+      "timestamp": "2025-08-07T15:36:03.746370"
+    },
+    {
+      "user_input": "I want to know, which,  Which neurology doctor is available.",
+      "ai_response": "Shalby Hospitals has a comprehensive Neuro Sciences department with a team of highly skilled neurologists and neurosurgeons specializing in various treatments, including neurology, neurosurgery, and stroke treatment.\n\nWhile the specific names of all neurology doctors are not listed here, Shalby Hospitals ensures that you receive care from expert specialists in this field.\n\nTo know which neurology doctor is currently available or to schedule an appointment, please contact Shalby Hospitals directly at +91 7069001001 or +91 95120 06886. They will be able to provide you with the most up-to-date information and assist with your booking.",
+      "timestamp": "2025-08-07T15:37:46.063224"
+    }
+  ],
+  "episodic_memory": {
+    "33c3b38a-6b61-4f01-a34f-d14e9e9e52d6": [
+      {
+        "user_input": "Uh, I want to know which Orthopedics doctors are available.",
+        "ai_response": "Shalby Hospitals is globally recognized for its excellence in Bone and Joint care. Dr. Vikram Shah, the founder and Chairman & Managing Director of Shalby Hospitals, is a renowned orthopedic surgeon, particularly known for his innovative \"Zero Technique\" in joint replacement surgeries.\n\nAs a leading multispecialty hospital chain, Shalby Hospitals has a dedicated team of highly skilled orthopedic specialists for various procedures including joint replacements (knee/hip), trauma, spine surgery, and arthroscopy.\n\nTo find out about the specific orthopedic doctors available and their schedules, or to book an appointment, please contact Shalby Hospitals directly at +91 7069001001 or +91 95120 06886.",
+        "timestamp": "2025-08-07T15:36:03.746370"
+      },
+      {
+        "user_input": "I want to know, which,  Which neurology doctor is available.",
+        "ai_response": "Shalby Hospitals has a comprehensive Neuro Sciences department with a team of highly skilled neurologists and neurosurgeons specializing in various treatments, including neurology, neurosurgery, and stroke treatment.\n\nWhile the specific names of all neurology doctors are not listed here, Shalby Hospitals ensures that you receive care from expert specialists in this field.\n\nTo know which neurology doctor is currently available or to schedule an appointment, please contact Shalby Hospitals directly at +91 7069001001 or +91 95120 06886. They will be able to provide you with the most up-to-date information and assist with your booking.",
+        "timestamp": "2025-08-07T15:37:46.063224"
+      }
+    ]
+  },
+  "current_session": "33c3b38a-6b61-4f01-a34f-d14e9e9e52d6"
+>>>>>>> ee9921a3d239a4e35bb83e8ae100b5ee33443183
+}

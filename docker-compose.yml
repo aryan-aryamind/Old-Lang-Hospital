@@ -1,0 +1,51 @@
+version: "3.9"
+services:
+  web:
+    build: .
+    container_name: rag_hospital_web
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      # Flask
+      - PORT=5000
+      - FLASK_ENV=production
+      # Postgres connection (app uses these in doctor_appointments/lab_appointments)
+      - PG_DB=rag_db
+      - PG_USER=rag_user
+      - PG_PASSWORD=rag_pass
+      - PG_HOST=db
+      - PG_PORT=5432
+      # Google TTS credentials path inside the container (mounted below)
+      - GOOGLE_APPLICATION_CREDENTIALS=/secrets/service-account-key.json
+    volumes:
+      # Persist audio cache
+      - static_cache:/app/static/audio_cache
+      # Mount Google credentials (place your JSON at ./service-account-key.json or override)
+      - ./service-account-key.json:/secrets/service-account-key.json:ro
+      # Optionally persist JSON booking files for dev/testing
+      - ./bookings.json:/app/bookings.json
+      - ./lab_bookings.json:/app/lab_bookings.json
+      - ./appointments.json:/app/appointments.json
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15-alpine
+    container_name: rag_hospital_db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=rag_db
+      - POSTGRES_USER=rag_user
+      - POSTGRES_PASSWORD=rag_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db_init.sql:/docker-entrypoint-initdb.d/db_init.sql:ro
+
+volumes:
+  pgdata:
+  static_cache:
+
+

@@ -1,0 +1,24 @@
+twilio==8.10.0
+flask==2.3.3
+python-dotenv
+requests
+PyPDF2
+langchain
+langchain-community
+langchain-google-genai
+langchain-core
+sentence-transformers
+faiss-cpu
+fastapi
+uvicorn
+rapidfuzz
+dateparser
+psycopg2-binary
+<<<<<<< HEAD
+google-cloud-texttospeech
+scikit-learn
+fpdf
+gunicorn
+=======
+watchdog
+>>>>>>> ee9921a3d239a4e35bb83e8ae100b5ee33443183
