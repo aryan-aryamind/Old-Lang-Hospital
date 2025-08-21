@@ -65,3 +65,8 @@ instance/
 # Mac
 .DS_Store
 
+# PDF and data
+*.pdf
+
+# Ignore zipped files
+*.zip 

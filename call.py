@@ -41,9 +41,9 @@ def make_webhook_call(webhook_url):
         print(f"Error making webhook call: {e}")
         raise
 
-# Example webhook usage (set via environment variable):
-webhook_url = os.getenv("WEBHOOK_URL")
+# Example webhook usage (set via environment variable, fallback to hardcoded for dev):
+webhook_url = os.getenv("WEBHOOK_URL") or "https://5600dca9f0de.ngrok-free.app"  # Replace with your actual ngrok URL
 if not webhook_url:
-    raise RuntimeError("WEBHOOK_URL environment variable is not set")
+    raise RuntimeError("WEBHOOK_URL environment variable is not set and no fallback URL provided")
 call_sid = make_webhook_call(webhook_url)
 print(f"Webhook Call SID: {call_sid}")

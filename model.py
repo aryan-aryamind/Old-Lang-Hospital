@@ -93,7 +93,6 @@ language_detection_prompt = ChatPromptTemplate.from_messages([
     MessagesPlaceholder(variable_name="messages"),
 ])
 
-<<<<<<< HEAD
 lab_test_prompt = ChatPromptTemplate.from_messages([
     SystemMessage(content="""
         Analyze the user's message and determine if they want to book a lab test or inquire about lab testing services.
@@ -143,16 +142,20 @@ appointment_prompt = ChatPromptTemplate.from_messages([
     MessagesPlaceholder(variable_name="messages"),
 ])
 
-summarize_chain = summarize_prompt | model | parser
-bye_chain = bye_prompt | model | parser
-admission_chain = admission_prompt | model | parser
-extract_date_chain = extract_date_prompt | model | parser
-lab_test_chain = lab_test_prompt | model | parser
-appointment_chain = appointment_prompt | model | parser
+summarize_prompt = ChatPromptTemplate.from_messages([
+    SystemMessage(content="""You are a conversation summarizer for a university admission assistant. 
+    Your task is to concisely summarize the key information from the AI's response while:
+    1. Maintaining a natural, conversational tone
+    2. Preserving all critical details (requirements, deadlines, processes)
+    3. Keeping it under 80 words
+    4. Removing any redundant phrases like 'based on the document'
+    5. Formatting lists clearly when present
+    
+    Speak directly to the user (use "you" instead of "the applicant").
+    """),
+    MessagesPlaceholder(variable_name="messages"),
+])
 
-# Time extraction chain
-=======
->>>>>>> ee9921a3d239a4e35bb83e8ae100b5ee33443183
 extract_time_prompt = ChatPromptTemplate.from_messages([
     SystemMessage(content="""
         Extract the time from the user's message. Ignore unnecessary words, filler, or context. 
@@ -188,57 +191,38 @@ extract_date_prompt = ChatPromptTemplate.from_messages([
     MessagesPlaceholder(variable_name="messages"),
 ])
 
-<<<<<<< HEAD
-language_detection_prompt = ChatPromptTemplate.from_messages([
+# Define missing prompt templates if not already defined
+from langchain.prompts import ChatPromptTemplate, SystemMessage, MessagesPlaceholder
+
+admission_prompt = ChatPromptTemplate.from_messages([
     SystemMessage(content="""
-        Analyze the user's message to identify the language it is written in.
-
-        **Strictly return ONLY the corresponding Google TTS language code** as per the following mapping:
-        
-        - Hindi -> hi-IN
-        - English -> en-IN
-
-        Do not include any explanations, greetings, or other text.
-
-        ---
-        **Examples:**
-        
-        - **User Input:** "Hello, I would like to know more about your services."
-        - **Your Output:** en-IN
-
-        - **User Input:** "नमस्ते, आप कैसे हैं?"
-        - **Your Output:** hi-IN
-                  
-        - **User Input:** "Mujhe admission lena hai."
-        - **Your Output:** hi-IN
-        ---
-=======
-summarize_prompt = ChatPromptTemplate.from_messages([
-    SystemMessage(content="""You are a conversation summarizer for a university admission assistant. 
-    Your task is to concisely summarize the key information from the AI's response while:
-    1. Maintaining a natural, conversational tone
-    2. Preserving all critical details (requirements, deadlines, processes)
-    3. Keeping it under 80 words
-    4. Removing any redundant phrases like 'based on the document'
-    5. Formatting lists clearly when present
-    
-    Speak directly to the user (use "you" instead of "the applicant").
->>>>>>> ee9921a3d239a4e35bb83e8ae100b5ee33443183
+        Analyze the user's message and determine if they want to inquire about hospital admission or request to be admitted.
+        Respond with ONLY 'True' if the message indicates interest in admission, otherwise 'False'.
+        Do not add any explanations or other text.
     """),
     MessagesPlaceholder(variable_name="messages"),
 ])
 
-<<<<<<< HEAD
-extract_time_chain = extract_time_prompt | model | parser
-confirm_chain = confirm_prompt | model | parser
-=======
+confirm_prompt = ChatPromptTemplate.from_messages([
+    SystemMessage(content="""
+        Analyze the user's message and determine if it is a confirmation (yes/affirmative) or not.
+        Respond with ONLY 'True' for confirmation, otherwise 'False'.
+        Do not add any explanations or other text.
+    """),
+    MessagesPlaceholder(variable_name="messages"),
+])
+
+# Ensure all chains are defined before use
+# Example (place after prompt definitions and before helper functions):
 summarize_chain = summarize_prompt | model | parser
-extract_time_chain = extract_time_prompt | model | parser
-extract_date_chain = extract_date_prompt | model | parser
 bye_chain = bye_prompt | model | parser
-yes_chain = yes_prompt | model | parser
->>>>>>> ee9921a3d239a4e35bb83e8ae100b5ee33443183
-language_detection_chain = language_detection_prompt | model  | parser
+admission_chain = admission_prompt | model | parser
+extract_date_chain = extract_date_prompt | model | parser
+extract_time_chain = extract_time_prompt | model | parser
+lab_test_chain = lab_test_prompt | model | parser
+appointment_chain = appointment_prompt | model | parser
+language_detection_chain = language_detection_prompt | model | parser
+confirm_chain = confirm_prompt | model | parser
 
 def summarize(text):
     try:
@@ -251,7 +235,6 @@ def summarize(text):
         print(f"Error during summarization: {e}")
         return "Sorry, I couldn't generate a summary at this time."
 
-<<<<<<< HEAD
 def is_bye(text):
     try:
         messages = [
@@ -262,41 +245,18 @@ def is_bye(text):
     except Exception as e:
         print(f"Error checking good bye: {e}")
         return False
-    
-def is_lab_test(text):
-    try:
-        messages = [
-            HumanMessage(content=f"check:\n\n{text}")
-        ]
-        result = lab_test_chain.invoke({"messages": messages})
-        return result.strip().lower() == 'true'
-    except Exception as e:
-        print(f"Error checking lab test: {e}")
-        return 
-        
-def is_appointment(text):
-    try:
-        messages = [
-            HumanMessage(content=f"check:\n\n{text}")
-        ]
-        result = appointment_chain.invoke({"messages": messages})
-        return result.strip().lower() == 'true'
-    except Exception as e:
-        print(f"Error checking appointment booking: {e}")
-        return False
 
-def want_admission(text):
+
+def is_yes(text):
     try:
         messages = [
-            HumanMessage(content=f"check:\n\n{text}")
+            HumanMessage(content=f"{text}")
         ]
-        result = admission_chain.invoke({"messages":messages})
+        result = yes_prompt.invoke({"messages": messages}) # Changed from yes_chain to yes_prompt
         return result.strip().lower() == 'true'
     except Exception as e:
-        print(f"Error checking good bye: {e}")
+        print(f"Error checking confirmation: {e}")
         return False
-=======
->>>>>>> ee9921a3d239a4e35bb83e8ae100b5ee33443183
 
 def extract_date(text):
     try:
@@ -328,27 +288,37 @@ def extract_time(text):
         print(f"Error extracting time: {e}")
         return None
 
-def is_bye(text):
+def is_lab_test(text):
     try:
         messages = [
             HumanMessage(content=f"check:\n\n{text}")
         ]
-        result = bye_chain.invoke({"messages":messages})
+        result = lab_test_chain.invoke({"messages": messages})
+        return result.strip().lower() == 'true'
+    except Exception as e:
+        print(f"Error checking lab test: {e}")
+        return False
+        
+def is_appointment(text):
+    try:
+        messages = [
+            HumanMessage(content=f"check:\n\n{text}")
+        ]
+        result = appointment_chain.invoke({"messages": messages})
+        return result.strip().lower() == 'true'
+    except Exception as e:
+        print(f"Error checking appointment booking: {e}")
+        return False
+
+def want_admission(text):
+    try:
+        messages = [
+            HumanMessage(content=f"check:\n\n{text}")
+        ]
+        result = admission_chain.invoke({"messages":messages})
         return result.strip().lower() == 'true'
     except Exception as e:
         print(f"Error checking good bye: {e}")
-        return False
-
-
-def is_yes(text):
-    try:
-        messages = [
-            HumanMessage(content=f"{text}")
-        ]
-        result = yes_chain.invoke({"messages": messages})
-        return result.strip().lower() == 'true'
-    except Exception as e:
-        print(f"Error checking confirmation: {e}")
         return False
 
 def conversation_loop():
@@ -380,38 +350,6 @@ def detect_language(text):
     except Exception as e:
         print(f"An error occurred during language detection: {e}")
         return "Unknown"
-
-
-def detect_language(text):
-    try:    
-        # Handle empty or very short text
-        if not text or len(text.strip()) < 2:
-            return "en-IN"  # Default to English for very short inputs
-        
-        messages = [
-            HumanMessage(content=text)
-        ]
-
-        # Invoke the language detection chain
-        result = language_detection_chain.invoke({"messages": messages})
-
-        # Clean and validate the result
-        language_code = result.strip() if result else "en-IN"
-        
-        # Validate that we got a proper language code
-        valid_codes = ["en-IN", "hi-IN"]
-        if language_code not in valid_codes:
-            # Try to detect based on text content
-            if any(char in text for char in ['अ', 'आ', 'इ', 'ई', 'उ', 'ऊ', 'ए', 'ऐ', 'ओ', 'औ', 'क', 'ख', 'ग', 'घ', 'ङ', 'च', 'छ', 'ज', 'झ', 'ञ', 'ट', 'ठ', 'ड', 'ढ', 'ण', 'त', 'थ', 'द', 'ध', 'न', 'प', 'फ', 'ब', 'भ', 'म', 'य', 'र', 'ल', 'व', 'श', 'ष', 'स', 'ह', 'क्ष', 'त्र', 'ज्ञ', 'ड़', 'ढ़']):
-                language_code = "hi-IN"
-            else:
-                language_code = "en-IN"
-        
-        return language_code
-        
-    except Exception as e:
-        print(f"An error occurred during language detection: {e}")
-        return "en-IN"  # Default to English on error
 
 
 # Example usage

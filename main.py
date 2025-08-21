@@ -11,13 +11,7 @@ from rapidfuzz import process, fuzz
 import dateparser
 from sms import send_sms
 import requests
-<<<<<<< HEAD
-from model import summarize, is_bye, extract_date, extract_time, is_confirm, detect_language, is_lab_test, is_appointment
-=======
-from model import is_bye, is_yes,summarize, extract_date, extract_time, detect_language
-from google_tts import GoogleCloudTTS
-from chain import ConversationalRAGChain
->>>>>>> ee9921a3d239a4e35bb83e8ae100b5ee33443183
+from model import summarize, is_bye, extract_date, extract_time, is_confirm, detect_language, is_lab_test, is_appointment, is_yes  # Added is_yes import
 import psycopg2
 import csv
 
@@ -82,6 +76,9 @@ app.config['STATIC_FOLDER'] = 'static'
 # Twilio authentication
 TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
 VALIDATE_REQUESTS = os.environ.get("VALIDATE_REQUESTS", "false").lower() == "true"
+
+# Add these at the top or where other intent helpers are defined
+no_words = ["no", "nope", "nah", "not now", "don't", "do not", "cancel", "stop"]
 
 def clean_text(text):
     text = text.replace("\n", " ")
@@ -631,7 +628,6 @@ def voice_webhook():
         resp.hangup()
         return str(resp)
 
-
 def parse_booking_request(text):
     """Extract department, date, and time from user input using regex and keywords."""
     department = None
@@ -716,22 +712,19 @@ def server_rag():
     # --- Lab test booking intent detection ---
     lab_keywords = ['lab test', 'book lab test', 'blood test', 'health checkup', 'scan', 'package']
     test_names = get_lab_test_names()
-    if is_lab_test(rag_question):
-    # if any(kw in rag_question.lower() for kw in lab_keywords) or any(test.lower() in rag_question.lower() for test in test_names):
+    if any(kw in rag_question.lower() for kw in lab_keywords) or any(test.lower() in rag_question.lower() for test in test_names):
         test_list = ', '.join(test_names)
-        primary_message = f"We have the following lab tests available: {test_list}. Which one would you like to book?"
-        secondary_message = "Are you still there? Please say the lab test name."
-        
-        return str(create_timeout_gather(
-            input_type='speech',
-            action='/collect-lab-test',
-            method='POST',
-            barge_in=True,
-            primary_timeout=10,
-            secondary_timeout=8,
-            primary_message=primary_message,
-            secondary_message=secondary_message
-        ))
+        # Speak the available lab tests inside a Gather with barge_in=True
+        gather = Gather(input='speech', action='/collect-lab-test', method='POST', barge_in=True, timeout=10)
+        gather.say(f"We have the following lab tests available: {test_list}. Which one would you like to book?")
+        resp.append(gather)
+        # Add a second prompt if no response
+        gather2 = Gather(input='speech', action='/collect-lab-test', method='POST', barge_in=True, timeout=8)
+        gather2.say("Are you still there? Please say the lab test name.")
+        resp.append(gather2)
+        resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
+        resp.hangup()
+        return str(resp)
 
     # --- Existing doctor appointment logic ---
     if 'book' in rag_question.lower() and 'appointment' in rag_question.lower():
@@ -847,30 +840,6 @@ def server_rag():
 
     # RAG fallback
     try:
-<<<<<<< HEAD
-        api_resp = requests.post(
-            API,
-            json={
-                'question': rag_question,
-                "session_id": "user123",
-            }
-        )
-        if api_resp.status_code == 200:
-            rag_ans = api_resp.json().get('answer')
-            # Custom fallback for not-found answers
-            if rag_ans and (
-                'document does not contain information' in rag_ans.lower() or
-                'cannot fulfill this request' in rag_ans.lower() or
-                'no information' in rag_ans.lower()
-            ):
-                rag_ans = "Sorry, I am unable to help with that as an AI voice agent. Can you please ask another question?"
-            logger.info(f"RAG API response: {rag_ans}")
-            summarize_ans = summarize(rag_ans)
-            logger.info(f"Summarize Answer: {summarize_ans}")
-            # Use timeout helper for consistent behavior
-            resp = create_timeout_gather(
-                input_type='speech',
-=======
         if is_bye(rag_question):
             resp.say("Thank you!", voice='alice')
             resp.hangup()
@@ -885,57 +854,17 @@ def server_rag():
         logger.info(f"Speech path: {speech}")
         gather = Gather(
                 input='speech',
->>>>>>> ee9921a3d239a4e35bb83e8ae100b5ee33443183
                 action='/server-rag',
                 method='POST',
-                barge_in=True,
-                primary_timeout=12,
-                secondary_timeout=8,
-                primary_message=summarize_ans,
-                secondary_message="Are you still there? Would you like to ask anything else? I would be happy to help you."
+                barge_in=True
             )
-<<<<<<< HEAD
-        else:
-            raise Exception(f"API returned status {api_resp.status_code}")
-=======
         gather.play(speech)
         resp.append(gather)
-        # api_resp = requests.post(
-        #     API,
-        #     json={
-        #         'question': rag_question,
-        #         "session_id": "user123",
-        #     }
-        # )
-        # if api_resp.status_code == 200:
-        #     rag_ans = api_resp.json().get('answer')
-        #     # Custom fallback for not-found answers
-        #     if rag_ans and (
-        #         'document does not contain information' in rag_ans.lower() or
-        #         'cannot fulfill this request' in rag_ans.lower() or
-        #         'no information' in rag_ans.lower()
-        #     ):
-        #         rag_ans = "Sorry, I am unable to help with that as an AI voice agent. Can you please ask another question?"
-        #     logger.info(f"RAG API response: {rag_ans}")
-        #     summarize_ans = summarize(rag_ans)
-        #     logger.info(f"Summarize Answer: {summarize_ans}")
-        #     gather = Gather(
-        #         input='speech',
-        #         action='/server-rag',
-        #         method='POST',
-        #         barge_in=True
-        #     )
-        #     gather.say(summarize_ans)
-        #     resp.append(gather)
-    #     else:
-    #         raise Exception(f"API returned status {api_resp.status_code}")
->>>>>>> ee9921a3d239a4e35bb83e8ae100b5ee33443183
     except Exception as e:
         logger.error(f"Error calling RAG API: {e}")
         message = "Sorry, I'm having trouble accessing the information right now."
         resp = create_tts_response(message)
     return str(resp)
-
 
 # Helper: Get departments from doctors_list.json
 with open('doctors_list.json', 'r', encoding='utf-8') as f:
@@ -1229,18 +1158,10 @@ def collect_date():
         today = datetime.today().date()
         two_months_later = today + timedelta(days=30)
         if parsed_date < today or parsed_date > two_months_later:
-            return str(create_timeout_gather(
-                input_type='speech',
-                action='/collect-date',
-                method='POST',
-                barge_in=True,
-                primary_timeout=12,
-                secondary_timeout=8,
-                primary_message="Sorry, you can only book appointments from today up to one month ahead. Please say a valid date.",
-                secondary_message="Are you still there? Please say a valid date.",
-                # speechModel="deepgram_nova-3",
-                # language="multi"
-            ))
+            gather = Gather(input='speech', action='/collect-date', method='POST')
+            gather.say("Sorry, you can only book appointments from today up to one month ahead. Please say a valid date.")
+            resp.append(gather)
+            return str(resp)
         session['date'] = date
         user_sessions[call_sid] = session
         # Always proceed to collect time
@@ -1255,18 +1176,10 @@ def collect_date():
             message=message
         ))
     else:
-        return str(create_timeout_gather(
-            input_type='speech',
-            action='/collect-date',
-            method='POST',
-            barge_in=True,
-            primary_timeout=12,
-            secondary_timeout=8,
-            primary_message="Sorry, I didn't understand the date. Please say the date in the format 21 August 2025 or 21-08-2025.",
-            secondary_message="Are you still there? Please say the date.",
-            # speechModel="deepgram_nova-3",
-            # language="multi"
-        ))
+        gather = Gather(input='speech', action='/collect-date', method='POST')
+        gather.say("Sorry, I didn't understand the date. Please say the date in the format 21 August 2025 or 21-08-2025.")
+        resp.append(gather)
+        return str(resp)
 
 def is_time_in_range(start, end, check):
     """Check if check (HH:MM) is in [start, end) (HH:MM)."""
@@ -1321,16 +1234,11 @@ def collect_time():
         session['time'] = slot['time']
         session['doctor'] = slot['doctor']
         user_sessions[call_sid] = session
-        message = f"{slot['doctor']} is available in {department} on {date} at {slot['time']}. Would you like to book with {slot['doctor']}? Please say yes or no."
-        
-        return str(create_tts_gather(
-            input_type='speech',
-            action='/confirm-datetime',
-            method='POST',
-            barge_in=True,
-            timeout=12,
-            message=message
-        ))
+        resp = VoiceResponse()
+        gather = Gather(input='speech', action='/confirm-datetime', method='POST', timeout=12)
+        gather.say(f"{slot['doctor']} is available in {department} on {date} at {slot['time']}. Would you like to book with {slot['doctor']}? Please say yes or no.")
+        resp.append(gather)
+        return str(resp)
     # If user requested a time but no doctor is available at that time, suggest next available slot after requested time
     if time_val and not matched_slots:
         try:
@@ -1349,74 +1257,44 @@ def collect_time():
                     next_slot = slot
         resp = VoiceResponse()
         if next_slot:
-            message = f"Sorry, that slot is already booked for all doctors. The next available slot is at {next_slot['time']} with {next_slot['doctor']}. Would you like to book this slot? Please say yes or no."
+            gather = Gather(input='speech', action='/confirm-datetime', method='POST', timeout=12)
+            gather.say(f"Sorry, that slot is already booked for all doctors. The next available slot is at {next_slot['time']} with {next_slot['doctor']}. Would you like to book this slot? Please say yes or no.")
             session['time'] = next_slot['time']
             session['doctor'] = next_slot['doctor']
             user_sessions[call_sid] = session
-            
-            return str(create_tts_gather(
-                input_type='speech',
-                action='/confirm-datetime',
-                method='POST',
-                barge_in=True,
-                timeout=12,
-                message=message
-            ))
+            resp.append(gather)
+            return str(resp)
         else:
             if available_slots:
                 earliest_slot = available_slots[0]
-                message = f"Sorry, no doctors are available at that time or later. The earliest available slot is at {earliest_slot['time']} with {earliest_slot['doctor']}. Would you like to book this slot? Please say yes or no."
+                gather = Gather(input='speech', action='/confirm-datetime', method='POST', timeout=12)
+                gather.say(f"Sorry, no doctors are available at that time or later. The earliest available slot is at {earliest_slot['time']} with {earliest_slot['doctor']}. Would you like to book this slot? Please say yes or no.")
                 session['time'] = earliest_slot['time']
                 session['doctor'] = earliest_slot['doctor']
                 user_sessions[call_sid] = session
-                
-                return str(create_tts_gather(
-                    input_type='speech',
-                    action='/confirm-datetime',
-                    method='POST',
-                    barge_in=True,
-                    timeout=12,
-                    message=message
-                ))
+                resp.append(gather)
+                return str(resp)
             else:
-                message = "Sorry, no doctors are available at any time today. Please try another day."
-                
-                return str(create_tts_gather(
-                    input_type='speech',
-                    action='/collect-time',
-                    method='POST',
-                    barge_in=True,
-                    timeout=12,
-                    message=message
-                ))
+                gather = Gather(input='speech', action='/collect-time', method='POST', timeout=12)
+                gather.say("Sorry, no doctors are available at any time today. Please try another day.")
+                resp.append(gather)
+                return str(resp)
     if not time_val and available_slots:
         slot = available_slots[0]
         session['time'] = slot['time']
         session['doctor'] = slot['doctor']
         user_sessions[call_sid] = session
-        message = f"The closest available slot is at {slot['time']} with {slot['doctor']}. Would you like to book this slot? Please say yes or no."
-        
-        return str(create_tts_gather(
-            input_type='speech',
-            action='/confirm-datetime',
-            method='POST',
-            barge_in=True,
-            timeout=12,
-            message=message
-        ))
+        resp = VoiceResponse()
+        gather = Gather(input='speech', action='/confirm-datetime', method='POST', timeout=12)
+        gather.say(f"The closest available slot is at {slot['time']} with {slot['doctor']}. Would you like to book this slot? Please say yes or no.")
+        resp.append(gather)
+        return str(resp)
+    resp = VoiceResponse()
     slot_list = ', '.join([f"{slot['time']} with {slot['doctor']}" for slot in available_slots]) if available_slots else 'No slots available.'
-    return str(create_timeout_gather(
-        input_type='speech',
-        action='/collect-time',
-        method='POST',
-        barge_in=True,
-        primary_timeout=12,
-        secondary_timeout=8,
-        primary_message=f"Sorry, available times for this department are: {slot_list}. Please say a valid time.",
-        secondary_message="Are you still there? Please say a valid time.",
-        # speechModel="deepgram_nova-3",
-        # language="multi"
-    ))
+    gather = Gather(input='speech', action='/collect-time', method='POST', timeout=12)
+    gather.say(f"Sorry, available times for this department are: {slot_list}. Please say a valid time.")
+    resp.append(gather)
+    return str(resp)
 
 @app.route('/confirm-datetime', methods=['POST'])
 def confirm_datetime():
@@ -1438,16 +1316,10 @@ def confirm_datetime():
         if doctor:
             session['step'] = 'confirm'
             user_sessions[call_sid] = session
-            message = f"{doctor} is available in {department} on {date} at {time}. Would you like to book with {doctor}? Please say yes or no."
-            
-            return str(create_tts_gather(
-                input_type='speech',
-                action='/confirm-booking',
-                method='POST',
-                barge_in=True,
-                timeout=10,
-                message=message
-            ))
+            gather = Gather(input='speech', action='/confirm-booking', method='POST')
+            gather.say(f"{doctor} is available in {department} on {date} at {time}. Would you like to book with {doctor}? Please say yes or no.")
+            resp.append(gather)
+            return str(resp)
         # If not, find all available doctors for that department/date/time
         available_slots = get_available_slots_for_department_and_date(department, date)
         doctors_at_time = [slot['doctor'] for slot in available_slots if slot['time'] == time]
@@ -1455,62 +1327,29 @@ def confirm_datetime():
             session['doctor'] = doctors_at_time[0]
             session['step'] = 'confirm'
             user_sessions[call_sid] = session
-            message = f"{doctors_at_time[0]} is available in {department} on {date} at {time}. Would you like to book with {doctors_at_time[0]}? Please say yes or no."
-            
-            return str(create_tts_gather(
-                input_type='speech',
-                action='/confirm-booking',
-                method='POST',
-                barge_in=True,
-                timeout=10,
-                message=message
-            ))
+            gather = Gather(input='speech', action='/confirm-booking', method='POST')
+            gather.say(f"{doctors_at_time[0]} is available in {department} on {date} at {time}. Would you like to book with {doctors_at_time[0]}? Please say yes or no.")
+            resp.append(gather)
+            return str(resp)
         elif len(doctors_at_time) > 1:
             session['available_doctors'] = doctors_at_time
             user_sessions[call_sid] = session
             doc_list = ', '.join([f"Dr. {d}" for d in doctors_at_time])
-            message = f"The following doctors are available in {department} on {date} at {time}: {doc_list}. Which doctor would you like to book with? Please say the doctor's name."
-            
-            return str(create_tts_gather(
-                input_type='speech',
-                action='/choose-doctor',
-                method='POST',
-                barge_in=True,
-                timeout=10,
-                message=message
-            ))
+            gather = Gather(input='speech', action='/choose-doctor', method='POST')
+            gather.say(f"The following doctors are available in {department} on {date} at {time}: {doc_list}. Which doctor would you like to book with? Please say the doctor's name.")
+            resp.append(gather)
+            return str(resp)
         else:
-<<<<<<< HEAD
-            message = f"Sorry, no doctors are available at that time. Please say another time."
-            
-            return str(create_tts_gather(
-                input_type='speech',
-                action='/collect-time',
-                method='POST',
-                barge_in=True,
-                timeout=10,
-                message=message
-            ))
-    elif any(word in answer for word in no_words):
-=======
             gather = Gather(input='speech', action='/collect-time', method='POST')
             gather.say(f"Sorry, no doctors are available at that time. Please say another time.")
             resp.append(gather)
             return str(resp)
-    # elif any(word in answer for word in no_words):
-    elif not is_yes(answer):
->>>>>>> ee9921a3d239a4e35bb83e8ae100b5ee33443183
+    elif any(word in answer for word in no_words):
         # Instead of restarting, go back to time selection for same department/date
-        message = f"Okay, let's try another time. Please say the time you want for your appointment in {department} on {date}."
-        
-        return str(create_tts_gather(
-            input_type='speech',
-            action='/collect-time',
-            method='POST',
-            barge_in=True,
-            timeout=12,
-            message=message
-        ))
+        gather = Gather(input='speech', action='/collect-time', method='POST', timeout=12)
+        gather.say(f"Okay, let's try another time. Please say the time you want for your appointment in {department} on {date}.")
+        resp.append(gather)
+        return str(resp)
     else:
         agent_msg1 = f"You want to book an appointment in {department} on {date} at {time}. Is this correct? Please say yes or no."
         logger.info(f"Agent: {agent_msg1}")
@@ -1552,7 +1391,7 @@ def confirm_booking():
         user_sessions[call_sid] = session
         agent_msg = "Can you please share your good name for the booking?"
         logger.info(f"Agent: {agent_msg}")
-        gather = Gather(input='speech', action='/collect-name', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='speech', action='/collect-name', method='POST', timeout=12)
         gather.say(agent_msg)
         resp.append(gather)
         return str(resp)
@@ -1560,7 +1399,7 @@ def confirm_booking():
         # Instead of ending, go back to time selection for same department/date
         department = session.get('department')
         date = session.get('date')
-        gather = Gather(input='speech', action='/collect-time', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='speech', action='/collect-time', method='POST', timeout=12)
         gather.say(f"Okay, let's try another time. Please say the time you want for your appointment in {department} on {date}.")
         resp.append(gather)
         return str(resp)
@@ -1568,11 +1407,11 @@ def confirm_booking():
         agent_msg1 = "Is the information correct? Please say yes or no."
         agent_msg2 = "Are you there? Can you speak yes or no?"
         logger.info(f"Agent: {agent_msg1}")
-        gather = Gather(input='speech', action='/finalize-booking', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='speech', action='/finalize-booking', method='POST', timeout=12)
         gather.say(agent_msg1)
         resp.append(gather)
         logger.info(f"Agent: {agent_msg2}")
-        gather2 = Gather(input='speech', action='/finalize-booking', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+        gather2 = Gather(input='speech', action='/finalize-booking', method='POST', timeout=12)
         gather2.say(agent_msg2)
         resp.append(gather2)
         resp.say("We didn't receive any input. Goodbye!")
@@ -1593,7 +1432,7 @@ def collect_name():
         session['name_attempts'] = attempts
         user_sessions[call_sid] = session
         if attempts < 2:
-            gather = Gather(input='speech', action='/collect-name', method='POST', timeout=10, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/collect-name', method='POST', timeout=10, language='en-IN')
             gather.say("Sorry, I didn't catch your name. Can you repeat your name for the booking?")
             resp.append(gather)
             return str(resp)
@@ -1607,7 +1446,7 @@ def collect_name():
     session['name_attempts'] = 0
     user_sessions[call_sid] = session
     # Increase DTMF timeout to 15 seconds
-    gather = Gather(input='dtmf', num_digits=10, action='/confirm-mobile', method='POST', timeout=15, speechModel="deepgram_nova-3", language="multi")
+    gather = Gather(input='dtmf', num_digits=10, action='/confirm-mobile', method='POST', timeout=15)
     gather.say("Thank you. Now, please enter your 10 digit mobile number using the keypad.")
     resp.append(gather)
     return str(resp)
@@ -1628,12 +1467,12 @@ def confirm_mobile():
                 f"You are booking an appointment with {session.get('doctor','')} in {session.get('department','')} on {session.get('date','')} at {session.get('time','')}. "
                 f"Your name is {session.get('name','')} and your mobile number is {digits}. Is this correct? Please say yes or no."
             )
-            gather = Gather(input='speech', action='/finalize-booking', method='POST', speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/finalize-booking', method='POST')
             gather.say(details)
             resp.append(gather)
         else:
             logger.warning(f"/confirm-mobile: Invalid mobile number entered: {digits}")
-            gather = Gather(input='dtmf', num_digits=10, action='/confirm-mobile', method='POST', timeout=15, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='dtmf', num_digits=10, action='/confirm-mobile', method='POST', timeout=15)
             gather.say("That was not a valid mobile number. Please enter your 10 digit mobile number using the keypad.")
             resp.append(gather)
     except Exception as e:
@@ -1717,7 +1556,7 @@ def finalize_booking():
             except Exception as e:
                 logger.error(f"Error sending SMS: {e}")
             resp.say(f"Your slot has been booked with {doctor} in {department} on {date} at {time}. Thank you!")
-            gather = Gather(input='speech', action='/post-booking-options', method='POST', timeout=10, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/post-booking-options', method='POST', timeout=10)
             gather.say("Do you have any more questions to ask, or would you like to book another appointment? You can say 'book appointment', 'ask a question', or 'no'.")
             resp.append(gather)
             return str(resp)
@@ -1725,14 +1564,14 @@ def finalize_booking():
             logger.warning(f"Appointment booking failed: {log_msg}")
             logger.warning(f"Booking failure reason: slot was already booked")
             resp.say("Sorry, the slot was just booked by someone else. Please try again.")
-        gather = Gather(input='speech', action='/post-booking-options', method='POST', timeout=10, speechModel="deepgram_nova-3", language="multi")
-        gather.say("Do you have any more questions to ask, or would you like to book another appointment? You can say 'book appointment', 'ask a question', or 'no'.")
-        resp.append(gather)
-        return str(resp)
+            gather = Gather(input='speech', action='/post-booking-options', method='POST', timeout=10)
+            gather.say("Do you have any more questions to ask, or would you like to book another appointment? You can say 'book appointment', 'ask a question', or 'no'.")
+            resp.append(gather)
+            return str(resp)
     elif any(word in answer for word in no_words):
         agent_msg = "Let's try again. Please tell me your name for the booking."
         logger.info(f"Agent: {agent_msg}")
-        gather = Gather(input='speech', action='/collect-name', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='speech', action='/collect-name', method='POST', timeout=12)
         gather.say(agent_msg)
         resp.append(gather)
         return str(resp)
@@ -1740,11 +1579,11 @@ def finalize_booking():
         agent_msg1 = "Is the information correct? Please say yes or no."
         agent_msg2 = "Are you there? Can you speak yes or no?"
         logger.info(f"Agent: {agent_msg1}")
-        gather = Gather(input='speech', action='/finalize-booking', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='speech', action='/finalize-booking', method='POST', timeout=12)
         gather.say(agent_msg1)
         resp.append(gather)
         logger.info(f"Agent: {agent_msg2}")
-        gather2 = Gather(input='speech', action='/finalize-booking', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+        gather2 = Gather(input='speech', action='/finalize-booking', method='POST', timeout=12)
         gather2.say(agent_msg2)
         resp.append(gather2)
         resp.say("We didn't receive any input. Goodbye!")
@@ -1759,17 +1598,17 @@ def post_booking_options():
     resp = VoiceResponse()
     # Booking/lab/no intents
     if any(word in answer for word in ['book lab test', 'lab test', 'blood test', 'health checkup', 'scan', 'package']):
-        gather = Gather(input='speech', action='/collect-lab-test', method='POST', timeout=10, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='speech', action='/collect-lab-test', method='POST', timeout=10)
         gather.say("Which lab test would you like to book? Please say the test name.")
         resp.append(gather)
         return str(resp)
     if any(word in answer for word in ['book', 'appointment', 'another']):
-        gather = Gather(input='speech', action='/collect-department', method='POST', timeout=10, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='speech', action='/collect-department', method='POST', timeout=10)
         gather.say("Which department do you want to book an appointment in? Please say the department.")
         resp.append(gather)
         return str(resp)
     elif any(word in answer for word in ['question', 'ask', 'info', 'information', 'query']):
-        gather = Gather(input='speech', action='/server-rag', method='POST', timeout=10, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='speech', action='/server-rag', method='POST', timeout=10)
         gather.say("Please ask your question now.")
         resp.append(gather)
         return str(resp)
@@ -1796,57 +1635,18 @@ def post_booking_options():
                     input='speech',
                     action='/server-rag',
                     method='POST',
-                    barge_in=True,
-                    speechModel="deepgram_nova-3",
-                    language="multi"
+                    barge_in=True
                 )
             gather.play(speech)
             resp.append(gather)
-            # api_resp = requests.post(
-            #     API,
-            #     json={
-            #         'question': answer,
-            #         "session_id": "user123",
-            #     }
-            # )
-            # if api_resp.status_code == 200:
-            #     rag_ans = api_resp.json().get('answer')
-            #     # Custom fallback for not-found answers
-            #     if rag_ans and (
-            #         'document does not contain information' in rag_ans.lower() or
-            #         'cannot fulfill this request' in rag_ans.lower() or
-            #         'no information' in rag_ans.lower()
-            #     ):
-            #         rag_ans = "Sorry, I am unable to help with that as an AI voice agent. Can you please ask another question?"
-            #     logger.info(f"RAG API response (post-booking): {rag_ans}")
-            #     summarize_ans = summarize(rag_ans)
-            #     logger.info(f"Summarize Answer (post-booking): {summarize_ans}")
-            #     gather = Gather(
-            #         input='speech',
-            #         action='/post-booking-options',
-            #         method='POST',
-            #         barge_in=True
-            #     )
-            #     gather.say(summarize_ans)
-            #     resp.append(gather)
-            # else:
-            #     raise Exception(f"API returned status {api_resp.status_code}")
         except Exception as e:
             logger.error(f"Error calling RAG API (post-booking): {e}")
             resp.say("Sorry, I'm having trouble accessing the information right now.")
         # Always prompt again for more questions or bookings
-        return str(create_timeout_gather(
-            input_type='speech',
-            action='/post-booking-options',
-            method='POST',
-            barge_in=True,
-            primary_timeout=12,
-            secondary_timeout=8,
-            primary_message="Do you have any more questions to ask, or would you like to book another appointment or lab test? You can say 'book appointment', 'book lab test', 'ask a question', or 'no'.",
-            secondary_message="Are you still there? Would you like to ask anything else? I would be happy to help you.",
-            # speechModel="deepgram_nova-3",
-            # language="multi"
-        ))
+        gather2 = Gather(input='speech', action='/post-booking-options', method='POST', timeout=10)
+        gather2.say("Do you have any more questions to ask, or would you like to book another appointment or lab test? You can say 'book appointment', 'book lab test', 'ask a question', or 'no'.")
+        resp.append(gather2)
+        return str(resp)
 
 @app.route('/status', methods=['POST'])
 def call_status():
@@ -1872,98 +1672,12 @@ def call_status():
 
 @app.route('/health', methods=['GET'])
 def health_check():
-    """Enhanced health check with RAG and TTS status"""
-    try:
-        status = {
-            'status': 'healthy',
-            'timestamp': datetime.now().isoformat(),
-            'rag_system': 'available' if rag_chain else 'unavailable',
-            'tts_system': 'available' if tts else 'unavailable',
-            'active_sessions': len(user_sessions)
-        }
-        
-        # if rag_chain:
-        #     status['rag_stats'] = rag_chain.get_memory_stats()
-        
-        return jsonify(status)
-        
-    except Exception as e:
-        logger.error(f"Health check error: {e}")
-        return jsonify({
-            'status': 'unhealthy',
-            'error': str(e),
-            'timestamp': datetime.now().isoformat()
-        }), 500
-
-# New RAG-specific routes
-@app.route('/rag-query', methods=['POST'])
-def rag_query_endpoint():
-    """Handle RAG queries via HTTP API"""
-    try:
-        data = request.get_json()
-        user_input = data.get('query', '')
-        
-        if not user_input:
-            return jsonify({'error': 'No query provided'}), 400
-        
-        text_response, audio_path = handle_rag_query(user_input)
-        
-        return jsonify({
-            'response': text_response,
-            'audio_path': audio_path,
-            'success': True
-        })
-        
-    except Exception as e:
-        logger.error(f"RAG query error: {e}")
-        return jsonify({
-            'error': str(e),
-            'success': False
-        }), 500
-
-@app.route('/rag-doctors', methods=['GET'])
-def rag_doctors_endpoint():
-    """Get doctors information via RAG system"""
-    try:
-        department = request.args.get('department')
-        
-        if not rag_chain:
-            return jsonify({'error': 'RAG system not available'}), 503
-        
-        doctors = rag_chain.get_available_doctors(department)
-        
-        return jsonify({
-            'doctors': doctors,
-            'success': True
-        })
-        
-    except Exception as e:
-        logger.error(f"RAG doctors error: {e}")
-        return jsonify({
-            'error': str(e),
-            'success': False
-        }), 500
-
-@app.route('/rag-stats', methods=['GET'])
-def rag_stats_endpoint():
-    """Get RAG system statistics"""
-    try:
-        if not rag_chain:
-            return jsonify({'error': 'RAG system not available'}), 503
-        
-        # stats = rag_chain.get_memory_stats()
-        
-        return jsonify({
-            # 'stats': stats,
-            'success': True
-        })
-        
-    except Exception as e:
-        logger.error(f"RAG stats error: {e}")
-        return jsonify({
-            'error': str(e),
-            'success': False
-        }), 500
+    """Health check endpoint"""
+    return jsonify({
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "version": "1.0.0"
+    })
 
 # --- Add this comment near the top of the file for DB setup ---
 #
@@ -2118,29 +1832,11 @@ def confirm_lab_test():
     answer = request.values.get('SpeechResult', '').strip().lower()
     resp = VoiceResponse()
     test = session.get('pending_lab_test')
-    # yes_words = ['yes', 'yeah', 'yup', 'yep', 'correct', 'right', 'ya', 'sure', 'ok', 'okay']
     no_words = ['no', 'nope', 'nah', 'not', 'incorrect', 'wrong']
-    # if any(word in answer for word in yes_words) and test:
     if is_yes(answer) and test:
         session['lab_test'] = test
         session.pop('pending_lab_test', None)
         user_sessions[call_sid] = session
-<<<<<<< HEAD
-        primary_message = f"Great. For which date do you want the {test}? Please say the date in the format 22 July 2025 or 22-07-2025."
-        secondary_message = "Are you still there? Please say the date for your lab test booking."
-        
-        return str(create_timeout_gather(
-            input_type='speech',
-            action='/collect-lab-date',
-            method='POST',
-            barge_in=True,
-            primary_timeout=10,
-            secondary_timeout=8,
-            primary_message=primary_message,
-            secondary_message=secondary_message
-        ))
-    elif any(word in answer for word in no_words):
-=======
         gather = Gather(input='speech', action='/collect-lab-date', method='POST', timeout=10)
         gather.say(f"Great. For which date do you want the {test}? Please say the date in the format 22 July 2025 or 22-07-2025.")
         resp.append(gather)
@@ -2150,9 +1846,7 @@ def confirm_lab_test():
         resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
         resp.hangup()
         return str(resp)
-    # elif any(word in answer for word in no_words):
-    elif not is_yes(answer):
->>>>>>> ee9921a3d239a4e35bb83e8ae100b5ee33443183
+    elif any(word in answer for word in no_words):
         session.pop('pending_lab_test', None)
         user_sessions[call_sid] = session
         test_list = ', '.join(get_lab_test_names())
@@ -2170,19 +1864,15 @@ def confirm_lab_test():
             secondary_message=secondary_message
         ))
     else:
-        primary_message = f"Did you mean {test}? Please say yes or no."
-        secondary_message = "Are you still there? Please say yes or no."
-        
-        return str(create_timeout_gather(
-            input_type='speech',
-            action='/confirm-lab-test',
-            method='POST',
-            barge_in=True,
-            primary_timeout=10,
-            secondary_timeout=8,
-            primary_message=primary_message,
-            secondary_message=secondary_message
-        ))
+        gather = Gather(input='speech', action='/confirm-lab-test', method='POST', timeout=10)
+        gather.say(f"Did you mean {test}? Please say yes or no.")
+        resp.append(gather)
+        gather2 = Gather(input='speech', action='/confirm-lab-test', method='POST', timeout=8)
+        gather2.say("Are you still there? Please say yes or no.")
+        resp.append(gather2)
+        resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
+        resp.hangup()
+        return str(resp)
 
 @app.route('/collect-lab-date', methods=['POST'])
 def collect_lab_date():
@@ -2200,20 +1890,20 @@ def collect_lab_date():
     if date:
         session['lab_date'] = date
         user_sessions[call_sid] = session
-        gather = Gather(input='speech', action='/confirm-lab-date', method='POST', barge_in=True, timeout=10, speechTimeout=1, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='speech', action='/confirm-lab-date', method='POST', barge_in=True, timeout=10)
         gather.say(f"You want to book the test on {date}. Is this correct? Please say yes or no.")
         resp.append(gather)
-        gather2 = Gather(input='speech', action='/confirm-lab-date', method='POST', barge_in=True, timeout=8, speechTimeout=1, speechModel="deepgram_nova-3", language="multi")
+        gather2 = Gather(input='speech', action='/confirm-lab-date', method='POST', barge_in=True, timeout=8)
         gather2.say("Are you still there? Please say yes or no.")
         resp.append(gather2)
         resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
         resp.hangup()
         return str(resp)
     else:
-        gather = Gather(input='speech', action='/collect-lab-date', method='POST', barge_in=True, timeout=10, speechTimeout=1, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='speech', action='/collect-lab-date', method='POST', barge_in=True, timeout=10)
         gather.say("Sorry, I didn't understand the date. Please say the date in the format 21 August 2025 or 21-08-2025.")
         resp.append(gather)
-        gather2 = Gather(input='speech', action='/collect-lab-date', method='POST', barge_in=True, timeout=8, speechTimeout=1, speechModel="deepgram_nova-3", language="multi")
+        gather2 = Gather(input='speech', action='/collect-lab-date', method='POST', barge_in=True, timeout=8)
         gather2.say("Are you still there? Please say the date for your lab test booking.")
         resp.append(gather2)
         resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
@@ -2309,29 +1999,29 @@ def collect_lab_time():
                         next_slot = slot
                         break
             if next_slot:
-                gather = Gather(input='speech', action='/confirm-lab-time', method='POST', barge_in=True, timeout=10, speechModel="deepgram_nova-3", language="multi")
+                gather = Gather(input='speech', action='/confirm-lab-time', method='POST', barge_in=True, timeout=10)
                 gather.say(f"Sorry, that slot is already booked. The next available slot is at {next_slot}. Is this okay? Please say yes or no.")
                 session['lab_time'] = next_slot
                 user_sessions[call_sid] = session
                 resp.append(gather)
                 return str(resp)
             else:
-                gather = Gather(input='speech', action='/collect-lab-time', method='POST', barge_in=True, timeout=10, speechModel="deepgram_nova-3", language="multi")
+                gather = Gather(input='speech', action='/collect-lab-time', method='POST', barge_in=True, timeout=10)
                 gather.say("Sorry, all slots are booked for this test on this date. Please try another date.")
                 resp.append(gather)
                 return str(resp)
         else:
             session['lab_time'] = slot_val
             user_sessions[call_sid] = session
-            gather = Gather(input='speech', action='/confirm-lab-time', method='POST', barge_in=True, timeout=10, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/confirm-lab-time', method='POST', barge_in=True, timeout=10)
             gather.say(f"You want to book the test at {slot_val}. Is this correct? Please say yes or no.")
             resp.append(gather)
             return str(resp)
     slot_str = ', '.join(slot_list) if slot_list else 'No slots available.'
-    gather = Gather(input='speech', action='/collect-lab-time', method='POST', barge_in=True, timeout=10, speechModel="deepgram_nova-3", language="multi")
+    gather = Gather(input='speech', action='/collect-lab-time', method='POST', barge_in=True, timeout=10)
     gather.say(f"Sorry, available 30 minute slots for this test are: {slot_str}. Please say a valid time.")
     resp.append(gather)
-    gather2 = Gather(input='speech', action='/collect-lab-time', method='POST', barge_in=True, timeout=8, speechModel="deepgram_nova-3", language="multi")
+    gather2 = Gather(input='speech', action='/collect-lab-time', method='POST', barge_in=True, timeout=8)
     gather2.say("Are you still there? Please say the time for your lab test booking.")
     resp.append(gather2)
     resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
@@ -2353,46 +2043,41 @@ def confirm_lab_time():
         user_sessions[call_sid] = session
         test_name = session.get('lab_test')
         if is_home_collection_available(test_name):
-            gather = Gather(input='speech', action='/confirm-lab-home', method='POST', barge_in=True, timeout=10, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/confirm-lab-home', method='POST', barge_in=True, timeout=10)
             gather.say(f"Do you want to book a home lab test? Please say yes or no.")
             resp.append(gather)
-            gather2 = Gather(input='speech', action='/confirm-lab-home', method='POST', barge_in=True, timeout=8, speechModel="deepgram_nova-3", language="multi")
+            gather2 = Gather(input='speech', action='/confirm-lab-home', method='POST', barge_in=True, timeout=8)
             gather2.say("Are you still there? Please say yes or no.")
             resp.append(gather2)
             resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
             resp.hangup()
             return str(resp)
         else:
-            gather = Gather(input='speech', action='/confirm-lab-home', method='POST', barge_in=True, timeout=10, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/confirm-lab-home', method='POST', barge_in=True, timeout=10)
             gather.say(f"Sorry, home lab test is not available for {test_name}. You can do this test at our hospital. Do you want to proceed with hospital lab test? Please say yes or no.")
             resp.append(gather)
-            gather2 = Gather(input='speech', action='/confirm-lab-home', method='POST', barge_in=True, timeout=8, speechModel="deepgram_nova-3", language="multi")
+            gather2 = Gather(input='speech', action='/confirm-lab-home', method='POST', barge_in=True, timeout=8)
             gather2.say("Are you still there? Please say yes or no.")
             resp.append(gather2)
             resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
             resp.hangup()
             return str(resp)
-<<<<<<< HEAD
-    elif any(word in answer for word in no_words):
-        gather = Gather(input='speech', action='/collect-lab-time', method='POST', barge_in=True, timeout=10, speechModel="deepgram_nova-3", language="multi")
-=======
     # elif any(word in answer for word in no_words):
     elif not is_yes(answer):
         gather = Gather(input='speech', action='/collect-lab-time', method='POST', barge_in=True, timeout=10)
->>>>>>> ee9921a3d239a4e35bb83e8ae100b5ee33443183
         gather.say("Okay, please say the time again for your lab test booking.")
         resp.append(gather)
-        gather2 = Gather(input='speech', action='/collect-lab-time', method='POST', barge_in=True, timeout=8, speechModel="deepgram_nova-3", language="multi")
+        gather2 = Gather(input='speech', action='/collect-lab-time', method='POST', barge_in=True, timeout=8)
         gather2.say("Are you still there? Please say the time for your lab test booking.")
         resp.append(gather2)
         resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
         resp.hangup()
         return str(resp)
     else:
-        gather = Gather(input='speech', action='/confirm-lab-time', method='POST', barge_in=True, timeout=10, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='speech', action='/confirm-lab-time', method='POST', barge_in=True, timeout=10)
         gather.say(f"You want to book the test at {time}. Is this correct? Please say yes or no.")
         resp.append(gather)
-        gather2 = Gather(input='speech', action='/confirm-lab-time', method='POST', barge_in=True, timeout=8, speechModel="deepgram_nova-3", language="multi")
+        gather2 = Gather(input='speech', action='/confirm-lab-time', method='POST', barge_in=True, timeout=8)
         gather2.say("Are you still there? Please say yes or no.")
         resp.append(gather2)
         resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
@@ -2414,10 +2099,10 @@ def confirm_lab_home():
         if is_yes(answer):
             session['lab_home_collection'] = True
             user_sessions[call_sid] = session
-            gather = Gather(input='speech', action='/collect-name-lab', method='POST', barge_in=True, timeout=10, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/collect-name-lab', method='POST', barge_in=True, timeout=10)
             gather.say("Okay, we will arrange for a home lab test. Can you please share your good name for the lab test booking?")
             resp.append(gather)
-            gather2 = Gather(input='speech', action='/collect-name-lab', method='POST', barge_in=True, timeout=8, speechModel="deepgram_nova-3", language="multi")
+            gather2 = Gather(input='speech', action='/collect-name-lab', method='POST', barge_in=True, timeout=8)
             gather2.say("Are you still there? Please say yes or no.")
             resp.append(gather2)
             resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
@@ -2427,20 +2112,20 @@ def confirm_lab_home():
         elif not is_yes(answer):
             session['lab_home_collection'] = False
             user_sessions[call_sid] = session
-            gather = Gather(input='speech', action='/collect-name-lab', method='POST', barge_in=True, timeout=10, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/collect-name-lab', method='POST', barge_in=True, timeout=10)
             gather.say("Okay, we will book your test at the hospital. Can you please share your good name for the lab test booking?")
             resp.append(gather)
-            gather2 = Gather(input='speech', action='/collect-name-lab', method='POST', barge_in=True, timeout=8, speechModel="deepgram_nova-3", language="multi")
+            gather2 = Gather(input='speech', action='/collect-name-lab', method='POST', barge_in=True, timeout=8)
             gather2.say("Are you still there? Please say yes or no.")
             resp.append(gather2)
             resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
             resp.hangup()
             return str(resp)
         else:
-            gather = Gather(input='speech', action='/confirm-lab-home', method='POST', barge_in=True, timeout=10, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/confirm-lab-home', method='POST', barge_in=True, timeout=10)
             gather.say("Do you want to book a home lab test? Please say yes or no.")
             resp.append(gather)
-            gather2 = Gather(input='speech', action='/confirm-lab-home', method='POST', barge_in=True, timeout=8, speechModel="deepgram_nova-3", language="multi")
+            gather2 = Gather(input='speech', action='/confirm-lab-home', method='POST', barge_in=True, timeout=8)
             gather2.say("Are you still there? Please say yes or no.")
             resp.append(gather2)
             resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
@@ -2449,43 +2134,33 @@ def confirm_lab_home():
     else:
         session['lab_home_collection'] = False
         user_sessions[call_sid] = session
-<<<<<<< HEAD
-        if any(word in answer for word in yes_words):
-            gather = Gather(input='speech', action='/collect-name-lab', method='POST', barge_in=True, timeout=10, speechModel="deepgram_nova-3", language="multi")
-=======
         # if any(word in answer for word in yes_words):
         if is_yes(answer):
             gather = Gather(input='speech', action='/collect-name-lab', method='POST', barge_in=True, timeout=10)
->>>>>>> ee9921a3d239a4e35bb83e8ae100b5ee33443183
             gather.say("Can you please share your good name for the lab test booking?")
             resp.append(gather)
-            gather2 = Gather(input='speech', action='/collect-name-lab', method='POST', barge_in=True, timeout=8, speechModel="deepgram_nova-3", language="multi")
+            gather2 = Gather(input='speech', action='/collect-name-lab', method='POST', barge_in=True, timeout=8)
             gather2.say("Are you still there? Please say yes or no.")
             resp.append(gather2)
             resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
             resp.hangup()
             return str(resp)
-<<<<<<< HEAD
-        elif any(word in answer for word in no_words):
-            gather = Gather(input='speech', action='/collect-lab-test', method='POST', barge_in=True, timeout=10, speechModel="deepgram_nova-3", language="multi")
-=======
         # elif any(word in answer for word in no_words):
         elif not is_yes(answer):
             gather = Gather(input='speech', action='/collect-lab-test', method='POST', barge_in=True, timeout=10)
->>>>>>> ee9921a3d239a4e35bb83e8ae100b5ee33443183
             gather.say("Okay, please say the test name again.")
             resp.append(gather)
-            gather2 = Gather(input='speech', action='/collect-lab-test', method='POST', barge_in=True, timeout=8, speechModel="deepgram_nova-3", language="multi")
+            gather2 = Gather(input='speech', action='/collect-lab-test', method='POST', barge_in=True, timeout=8)
             gather2.say("Are you still there? Please say the lab test name.")
             resp.append(gather2)
             resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
             resp.hangup()
             return str(resp)
         else:
-            gather = Gather(input='speech', action='/confirm-lab-home', method='POST', barge_in=True, timeout=10, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/confirm-lab-home', method='POST', barge_in=True, timeout=10)
             gather.say(f"Sorry, home lab test is not available for {test_name}. You can do this test at our hospital. Do you want to proceed with hospital lab test? Please say yes or no.")
             resp.append(gather)
-            gather2 = Gather(input='speech', action='/confirm-lab-home', method='POST', barge_in=True, timeout=8, speechModel="deepgram_nova-3", language="multi")
+            gather2 = Gather(input='speech', action='/confirm-lab-home', method='POST', barge_in=True, timeout=8)
             gather2.say("Are you still there? Please say yes or no.")
             resp.append(gather2)
             resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
@@ -2504,10 +2179,10 @@ def collect_name_lab():
         session['name_attempts'] = attempts
         user_sessions[call_sid] = session
         if attempts < 2:
-            gather = Gather(input='speech', action='/collect-name-lab', method='POST', timeout=10, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/collect-name-lab', method='POST', timeout=10, language='en-IN')
             gather.say("Sorry, I didn't catch your name. Can you repeat your name for the lab test booking?")
             resp.append(gather)
-            gather2 = Gather(input='speech', action='/collect-name-lab', method='POST', timeout=8, speechModel="deepgram_nova-3", language="multi")
+            gather2 = Gather(input='speech', action='/collect-name-lab', method='POST', timeout=8, language='en-IN')
             gather2.say("Are you still there? Please say your name for the lab test booking.")
             resp.append(gather2)
             resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
@@ -2520,10 +2195,10 @@ def collect_name_lab():
     session['lab_name'] = name
     session['name_attempts'] = 0
     user_sessions[call_sid] = session
-    gather = Gather(input='dtmf', num_digits=10, action='/confirm-mobile-lab', method='POST', timeout=10, speechModel="deepgram_nova-3", language="multi")
+    gather = Gather(input='dtmf', num_digits=10, action='/confirm-mobile-lab', method='POST', timeout=10)
     gather.say("Thank you. Now, please enter your 10 digit mobile number using the keypad.")
     resp.append(gather)
-    gather2 = Gather(input='dtmf', num_digits=10, action='/confirm-mobile-lab', method='POST', timeout=8, speechModel="deepgram_nova-3", language="multi")
+    gather2 = Gather(input='dtmf', num_digits=10, action='/confirm-mobile-lab', method='POST', timeout=8)
     gather2.say("Are you still there? Please enter your 10 digit mobile number.")
     resp.append(gather2)
     resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
@@ -2544,19 +2219,19 @@ def confirm_mobile_lab():
                 f"You are booking {session.get('lab_test','')} on {session.get('lab_date','')} at {session.get('lab_time','')}. "
                 f"Your name is {session.get('lab_name','')} and your mobile number is {digits}. Is this correct? Please say yes or no."
             )
-            gather = Gather(input='speech', action='/finalize-lab-booking', method='POST', timeout=10, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/finalize-lab-booking', method='POST', timeout=10)
             gather.say(details)
             resp.append(gather)
-            gather2 = Gather(input='speech', action='/finalize-lab-booking', method='POST', timeout=8, speechModel="deepgram_nova-3", language="multi")
+            gather2 = Gather(input='speech', action='/finalize-lab-booking', method='POST', timeout=8)
             gather2.say("Are you still there? Please say yes or no.")
             resp.append(gather2)
             resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
             resp.hangup()
         else:
-            gather = Gather(input='dtmf', num_digits=10, action='/confirm-mobile-lab', method='POST', timeout=10, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='dtmf', num_digits=10, action='/confirm-mobile-lab', method='POST', timeout=10)
             gather.say("That was not a valid mobile number. Please enter your 10 digit mobile number using the keypad.")
             resp.append(gather)
-            gather2 = Gather(input='dtmf', num_digits=10, action='/confirm-mobile-lab', method='POST', timeout=8, speechModel="deepgram_nova-3", language="multi")
+            gather2 = Gather(input='dtmf', num_digits=10, action='/confirm-mobile-lab', method='POST', timeout=8)
             gather2.say("Are you still there? Please enter your 10 digit mobile number.")
             resp.append(gather2)
             resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
@@ -2579,9 +2254,6 @@ def finalize_lab_booking():
     time = session.get('lab_time')
     name = session.get('lab_name')
     home_collection = session.get('lab_home_collection', False)
-    # yes_words = ['yes', 'yeah', 'yup', 'yep', 'correct', 'right', 'ya', 'sure', 'ok', 'okay']
-    # no_words = ['no', 'nope', 'nah', 'not', 'incorrect', 'wrong']
-    # if any(word in answer for word in yes_words) and len(digits) == 10:
     if is_yes(answer) and len(digits) == 10:
         try:
             insert_lab_booking(test_name, date, time, name, digits, home_collection)
@@ -2605,11 +2277,11 @@ def finalize_lab_booking():
                         bookings = json.load(f)
                         if not isinstance(bookings, list):
                             bookings = []
-                else:
-                    bookings = []
-                bookings.append(booking_data)
-                with open(bookings_file, 'w', encoding='utf-8') as f:
-                    json.dump(bookings, f, indent=2)
+                    else:
+                        bookings = []
+                    bookings.append(booking_data)
+                    with open(bookings_file, 'w', encoding='utf-8') as f:
+                        json.dump(bookings, f, indent=2)
             except Exception as e:
                 logger.error(f"Error writing to lab_bookings.json: {e}")
             # --- Send SMS confirmation ---
@@ -2627,10 +2299,10 @@ def finalize_lab_booking():
             except Exception as e:
                 logger.error(f"Error sending SMS for lab test: {e}")
             resp.say(f"Your lab test {test_name} has been booked for {date} at {time}. Thank you!")
-            gather = Gather(input='speech', action='/post-booking-options', method='POST', timeout=10, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/post-booking-options', method='POST', timeout=10)
             gather.say("Do you have any more questions to ask, or would you like to book another appointment or lab test? You can say 'book appointment', 'book lab test', 'ask a question', or 'no'.")
             resp.append(gather)
-            gather2 = Gather(input='speech', action='/post-booking-options', method='POST', timeout=8, speechModel="deepgram_nova-3", language="multi")
+            gather2 = Gather(input='speech', action='/post-booking-options', method='POST', timeout=8)
             gather2.say("Are you still there? Do you want to book another appointment or lab test?")
             resp.append(gather2)
             resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
@@ -2641,27 +2313,21 @@ def finalize_lab_booking():
             resp.say("Sorry, there was an error booking your lab test. Please try again.")
             resp.hangup()
             return str(resp)
-<<<<<<< HEAD
     elif any(word in answer for word in no_words):
-        gather = Gather(input='speech', action='/collect-name-lab', method='POST', timeout=10, speechModel="deepgram_nova-3", language="multi")
-=======
-    # elif any(word in answer for word in no_words):
-    elif not is_yes(answer):
         gather = Gather(input='speech', action='/collect-name-lab', method='POST', timeout=10)
->>>>>>> ee9921a3d239a4e35bb83e8ae100b5ee33443183
         gather.say("Let's try again. Please tell me your name for the lab test booking.")
         resp.append(gather)
-        gather2 = Gather(input='speech', action='/collect-name-lab', method='POST', timeout=8, speechModel="deepgram_nova-3", language="multi")
+        gather2 = Gather(input='speech', action='/collect-name-lab', method='POST', timeout=8)
         gather2.say("Are you still there? Please say your name for the lab test booking.")
         resp.append(gather2)
         resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
         resp.hangup()
         return str(resp)
     else:
-        gather = Gather(input='speech', action='/finalize-lab-booking', method='POST', timeout=10, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='speech', action='/finalize-lab-booking', method='POST', timeout=10)
         gather.say("Is the information correct? Please say yes or no.")
         resp.append(gather)
-        gather2 = Gather(input='speech', action='/finalize-lab-booking', method='POST', timeout=8, speechModel="deepgram_nova-3", language="multi")
+        gather2 = Gather(input='speech', action='/finalize-lab-booking', method='POST', timeout=8)
         gather2.say("Are you still there? Please say yes or no.")
         resp.append(gather2)
         resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
@@ -2676,42 +2342,33 @@ def confirm_lab_date():
     logger.info(f"/confirm-lab-date: User response: {answer}, Session: {session}")
     resp = VoiceResponse()
     date = session.get('lab_date')
-    # yes_words = ['yes', 'yeah', 'yup', 'yep', 'correct', 'right', 'ya', 'sure', 'ok', 'okay']
-    # no_words = ['no', 'nope', 'nah', 'not', 'incorrect', 'wrong']
-    # if any(word in answer for word in yes_words) and date:
     if is_yes(answer) and date:
         user_sessions[call_sid] = session
-        gather = Gather(input='speech', action='/collect-lab-time', method='POST', barge_in=True, timeout=10, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='speech', action='/collect-lab-time', method='POST', barge_in=True, timeout=10)
         timings = get_available_lab_test_timings(session.get('lab_test'))
         gather.say(f"Great. At what time on {date}? Available timings for this test are: {timings}. Please say the time.")
         resp.append(gather)
-        gather2 = Gather(input='speech', action='/collect-lab-time', method='POST', barge_in=True, timeout=8, speechModel="deepgram_nova-3", language="multi")
+        gather2 = Gather(input='speech', action='/collect-lab-time', method='POST', barge_in=True, timeout=8)
         gather2.say("Are you still there? Please say the time for your lab test booking.")
         resp.append(gather2)
         resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
         resp.hangup()
         return str(resp)
-<<<<<<< HEAD
     elif any(word in answer for word in no_words):
-        gather = Gather(input='speech', action='/collect-lab-date', method='POST', barge_in=True, timeout=10, speechModel="deepgram_nova-3", language="multi")
-=======
-    # elif any(word in answer for word in no_words):
-    elif not is_yes(answer):
         gather = Gather(input='speech', action='/collect-lab-date', method='POST', barge_in=True, timeout=10)
->>>>>>> ee9921a3d239a4e35bb83e8ae100b5ee33443183
         gather.say("Okay, please say the date again for your lab test booking.")
         resp.append(gather)
-        gather2 = Gather(input='speech', action='/collect-lab-date', method='POST', barge_in=True, timeout=8, speechModel="deepgram_nova-3", language="multi")
+        gather2 = Gather(input='speech', action='/collect-lab-date', method='POST', barge_in=True, timeout=8)
         gather2.say("Are you still there? Please say the date for your lab test booking.")
         resp.append(gather2)
         resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
         resp.hangup()
         return str(resp)
     else:
-        gather = Gather(input='speech', action='/confirm-lab-date', method='POST', barge_in=True, timeout=10, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='speech', action='/confirm-lab-date', method='POST', barge_in=True, timeout=10)
         gather.say(f"You want to book the test on {date}. Is this correct? Please say yes or no.")
         resp.append(gather)
-        gather2 = Gather(input='speech', action='/confirm-lab-date', method='POST', barge_in=True, timeout=8, speechModel="deepgram_nova-3", language="multi")
+        gather2 = Gather(input='speech', action='/confirm-lab-date', method='POST', barge_in=True, timeout=8)
         gather2.say("Are you still there? Please say yes or no.")
         resp.append(gather2)
         resp.say("We didn't receive any input. Thank you for calling. Goodbye!")
@@ -2730,14 +2387,14 @@ def reschedule_appointment():
         # Step 1: Ask for mobile number
         session['reschedule_step'] = 'get_mobile'
         user_sessions[call_sid] = session
-        gather = Gather(input='dtmf', num_digits=10, action='/reschedule-appointment', method='POST', timeout=15, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='dtmf', num_digits=10, action='/reschedule-appointment', method='POST', timeout=15)
         gather.say("To reschedule your appointment, please enter your 10 digit mobile number using the keypad.")
         resp.append(gather)
         return str(resp)
     elif step == 'get_mobile':
         digits = request.values.get('Digits', '')
         if len(digits) != 10:
-            gather = Gather(input='dtmf', num_digits=10, action='/reschedule-appointment', method='POST', timeout=15, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='dtmf', num_digits=10, action='/reschedule-appointment', method='POST', timeout=15)
             gather.say("That was not a valid mobile number. Please enter your 10 digit mobile number using the keypad.")
             resp.append(gather)
             return str(resp)
@@ -2763,7 +2420,7 @@ def reschedule_appointment():
         # Step 3: Ask for new date
         session['reschedule_step'] = 'get_new_date'
         user_sessions[call_sid] = session
-        gather = Gather(input='speech', action='/reschedule-appointment', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='speech', action='/reschedule-appointment', method='POST', timeout=12)
         gather.say(f"Found your appointment with {booking[1]} in {booking[2]} on {booking[3]} at {booking[4]}. What new date would you like to reschedule to? Please say the date.")
         resp.append(gather)
         return str(resp)
@@ -2771,14 +2428,14 @@ def reschedule_appointment():
         date_text = request.values.get('SpeechResult', '')
         date = extract_any_date(date_text)
         if not date:
-            gather = Gather(input='speech', action='/reschedule-appointment', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/reschedule-appointment', method='POST', timeout=12)
             gather.say("Sorry, I didn't understand the date. Please say the new date for your appointment.")
             resp.append(gather)
             return str(resp)
         session['reschedule_new_date'] = date
         session['reschedule_step'] = 'get_new_time'
         user_sessions[call_sid] = session
-        gather = Gather(input='speech', action='/reschedule-appointment', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='speech', action='/reschedule-appointment', method='POST', timeout=12)
         gather.say(f"On {date}, what time would you like? Please say the time, for example 3pm or 14:00.")
         resp.append(gather)
         return str(resp)
@@ -2786,7 +2443,7 @@ def reschedule_appointment():
         time_text = request.values.get('SpeechResult', '')
         time_val = extract_time(time_text)
         if not time_val:
-            gather = Gather(input='speech', action='/reschedule-appointment', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/reschedule-appointment', method='POST', timeout=12)
             gather.say("Sorry, I didn't understand the time. Please say the new time for your appointment.")
             resp.append(gather)
             return str(resp)
@@ -2808,7 +2465,7 @@ def reschedule_appointment():
                         next_slot = slot['time']
                         break
             if next_slot:
-                gather = Gather(input='speech', action='/reschedule-appointment', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+                gather = Gather(input='speech', action='/reschedule-appointment', method='POST', timeout=12)
                 gather.say(f"Sorry, that slot is not available. The next available slot for {doctor} is at {next_slot}. Would you like to reschedule to this time? Please say yes or no.")
                 session['reschedule_suggested_time'] = next_slot
                 session['reschedule_step'] = 'confirm_suggested_time'
@@ -2822,41 +2479,34 @@ def reschedule_appointment():
         session['reschedule_new_time'] = time_val
         session['reschedule_step'] = 'confirm_new_time'
         user_sessions[call_sid] = session
-        gather = Gather(input='speech', action='/reschedule-appointment', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='speech', action='/reschedule-appointment', method='POST', timeout=12)
         gather.say(f"You want to reschedule your appointment with {doctor} in {department} to {date} at {time_val}. Is this correct? Please say yes or no.")
         resp.append(gather)
         return str(resp)
     elif step == 'confirm_suggested_time':
         answer = request.values.get('SpeechResult', '').strip().lower()
-        # yes_words = ['yes', 'yeah', 'yup', 'yep', 'correct', 'right', 'ya', 'sure', 'ok', 'okay']
-        # no_words = ['no', 'nope', 'nah', 'not', 'incorrect', 'wrong']
-        # if any(word in answer for word in yes_words):
         if is_yes(answer):
             session['reschedule_new_time'] = session['reschedule_suggested_time']
             session['reschedule_step'] = 'confirm_new_time'
             user_sessions[call_sid] = session
-            gather = Gather(input='speech', action='/reschedule-appointment', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/reschedule-appointment', method='POST', timeout=12)
             gather.say(f"You want to reschedule your appointment to {session['reschedule_new_date']} at {session['reschedule_new_time']}. Is this correct? Please say yes or no.")
             resp.append(gather)
             return str(resp)
-        # elif any(word in answer for word in no_words):
         elif not is_yes(answer):
             session['reschedule_step'] = 'get_new_time'
             user_sessions[call_sid] = session
-            gather = Gather(input='speech', action='/reschedule-appointment', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/reschedule-appointment', method='POST', timeout=12)
             gather.say("Okay, please say another time for your appointment.")
             resp.append(gather)
             return str(resp)
         else:
-            gather = Gather(input='speech', action='/reschedule-appointment', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/reschedule-appointment', method='POST', timeout=12)
             gather.say("Would you like to reschedule to the suggested time? Please say yes or no.")
             resp.append(gather)
             return str(resp)
     elif step == 'confirm_new_time':
         answer = request.values.get('SpeechResult', '').strip().lower()
-        # yes_words = ['yes', 'yeah', 'yup', 'yep', 'correct', 'right', 'ya', 'sure', 'ok', 'okay']
-        # no_words = ['no', 'nope', 'nah', 'not', 'incorrect', 'wrong']
-        # if any(word in answer for word in yes_words):
         if is_yes(answer):
             # Step 5: Update booking in DB and JSON
             booking_id = session['reschedule_booking_id']
@@ -2897,13 +2547,12 @@ def reschedule_appointment():
             resp.say(f"Your appointment has been rescheduled to {new_date} at {new_time}. Thank you!")
             resp.hangup()
             return str(resp)
-        # elif any(word in answer for word in no_words):
         elif not is_yes(answer):
             resp.say("Okay, rescheduling cancelled. Your appointment remains unchanged. Thank you!")
             resp.hangup()
             return str(resp)
         else:
-            gather = Gather(input='speech', action='/reschedule-appointment', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/reschedule-appointment', method='POST', timeout=12)
             gather.say("Is the new date and time correct? Please say yes or no.")
             resp.append(gather)
             return str(resp)
@@ -2924,14 +2573,14 @@ def reschedule_lab_test():
         # Step 1: Ask for mobile number
         session['lab_reschedule_step'] = 'get_mobile'
         user_sessions[call_sid] = session
-        gather = Gather(input='dtmf', num_digits=10, action='/reschedule-lab-test', method='POST', timeout=15, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='dtmf', num_digits=10, action='/reschedule-lab-test', method='POST', timeout=15)
         gather.say("To reschedule your lab test, please enter your 10 digit mobile number using the keypad.")
         resp.append(gather)
         return str(resp)
     elif step == 'get_mobile':
         digits = request.values.get('Digits', '')
         if len(digits) != 10:
-            gather = Gather(input='dtmf', num_digits=10, action='/reschedule-lab-test', method='POST', timeout=15, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='dtmf', num_digits=10, action='/reschedule-lab-test', method='POST', timeout=15)
             gather.say("That was not a valid mobile number. Please enter your 10 digit mobile number using the keypad.")
             resp.append(gather)
             return str(resp)
@@ -2956,7 +2605,7 @@ def reschedule_lab_test():
         # Step 3: Ask for new date
         session['lab_reschedule_step'] = 'get_new_date'
         user_sessions[call_sid] = session
-        gather = Gather(input='speech', action='/reschedule-lab-test', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='speech', action='/reschedule-lab-test', method='POST', timeout=12)
         gather.say(f"Found your lab test booking for {booking[1]} on {booking[2]} at {booking[3]}. What new date would you like to reschedule to? Please say the date.")
         resp.append(gather)
         return str(resp)
@@ -2964,14 +2613,14 @@ def reschedule_lab_test():
         date_text = request.values.get('SpeechResult', '')
         date = extract_any_date(date_text)
         if not date:
-            gather = Gather(input='speech', action='/reschedule-lab-test', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/reschedule-lab-test', method='POST', timeout=12)
             gather.say("Sorry, I didn't understand the date. Please say the new date for your lab test.")
             resp.append(gather)
             return str(resp)
         session['lab_reschedule_new_date'] = date
         session['lab_reschedule_step'] = 'get_new_time'
         user_sessions[call_sid] = session
-        gather = Gather(input='speech', action='/reschedule-lab-test', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='speech', action='/reschedule-lab-test', method='POST', timeout=12)
         gather.say(f"On {date}, what time would you like? Please say the time, for example 3pm or 14:00.")
         resp.append(gather)
         return str(resp)
@@ -3010,7 +2659,7 @@ def reschedule_lab_test():
         slot_val = extract_time_slot(time_text)
         if not slot_val:
             slot_str = ', '.join(slot_list) if slot_list else 'No slots available.'
-            gather = Gather(input='speech', action='/reschedule-lab-test', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/reschedule-lab-test', method='POST', timeout=12)
             gather.say(f"Sorry, available 30 minute slots for this test are: {slot_str}. Please say a valid time.")
             resp.append(gather)
             return str(resp)
@@ -3031,7 +2680,7 @@ def reschedule_lab_test():
                         next_slot = slot
                         break
             if next_slot:
-                gather = Gather(input='speech', action='/reschedule-lab-test', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+                gather = Gather(input='speech', action='/reschedule-lab-test', method='POST', timeout=12)
                 gather.say(f"Sorry, that slot is already booked. The next available slot is at {next_slot}. Would you like to reschedule to this time? Please say yes or no.")
                 session['lab_reschedule_suggested_time'] = next_slot
                 session['lab_reschedule_step'] = 'confirm_suggested_time'
@@ -3045,7 +2694,7 @@ def reschedule_lab_test():
         session['lab_reschedule_new_time'] = slot_val
         session['lab_reschedule_step'] = 'confirm_new_time'
         user_sessions[call_sid] = session
-        gather = Gather(input='speech', action='/reschedule-lab-test', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+        gather = Gather(input='speech', action='/reschedule-lab-test', method='POST', timeout=12)
         gather.say(f"You want to reschedule your lab test {test_name} to {date} at {slot_val}. Is this correct? Please say yes or no.")
         resp.append(gather)
         return str(resp)
@@ -3057,19 +2706,19 @@ def reschedule_lab_test():
             session['lab_reschedule_new_time'] = session['lab_reschedule_suggested_time']
             session['lab_reschedule_step'] = 'confirm_new_time'
             user_sessions[call_sid] = session
-            gather = Gather(input='speech', action='/reschedule-lab-test', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/reschedule-lab-test', method='POST', timeout=12)
             gather.say(f"You want to reschedule your lab test to {session['lab_reschedule_new_date']} at {session['lab_reschedule_new_time']}. Is this correct? Please say yes or no.")
             resp.append(gather)
             return str(resp)
         elif any(word in answer for word in no_words):
             session['lab_reschedule_step'] = 'get_new_time'
             user_sessions[call_sid] = session
-            gather = Gather(input='speech', action='/reschedule-lab-test', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/reschedule-lab-test', method='POST', timeout=12)
             gather.say("Okay, please say another time for your lab test.")
             resp.append(gather)
             return str(resp)
         else:
-            gather = Gather(input='speech', action='/reschedule-lab-test', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/reschedule-lab-test', method='POST', timeout=12)
             gather.say("Would you like to reschedule to the suggested time? Please say yes or no.")
             resp.append(gather)
             return str(resp)
@@ -3121,7 +2770,7 @@ def reschedule_lab_test():
             resp.hangup()
             return str(resp)
         else:
-            gather = Gather(input='speech', action='/reschedule-lab-test', method='POST', timeout=12, speechModel="deepgram_nova-3", language="multi")
+            gather = Gather(input='speech', action='/reschedule-lab-test', method='POST', timeout=12)
             gather.say("Is the new date and time correct? Please say yes or no.")
             resp.append(gather)
             return str(resp)
@@ -3262,24 +2911,6 @@ def upload_csv():
         return jsonify({'success': False, 'message': str(e)}), 500
 
 if __name__ == '__main__':
-    print("🏥 Starting Integrated Hospital System with LangChain RAG and Google TTS...")
-    print("=" * 70)
-    
-    if rag_chain:
-        print("✅ LangChain RAG System: Available")
-        stats = rag_chain.get_memory_stats()
-        print(f"   - Memory: {stats['long_term_memory_count']} conversations")
-    else:
-        print("⚠️  LangChain RAG System: Unavailable")
-    
-    if tts:
-        print("✅ Google TTS System: Available")
-    else:
-        print("⚠️  Google TTS System: Unavailable")
-    
-    print("=" * 70)
-    print("🚀 Starting Flask server...")
-    
     # Log startup
     logger.info("Starting webhook server on http://localhost:5000")
     logger.info("Make sure to expose this server to the internet using ngrok or similar")

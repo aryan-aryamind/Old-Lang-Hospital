@@ -14,11 +14,8 @@ uvicorn
 rapidfuzz
 dateparser
 psycopg2-binary
-<<<<<<< HEAD
 google-cloud-texttospeech
 scikit-learn
 fpdf
 gunicorn
-=======
 watchdog
->>>>>>> ee9921a3d239a4e35bb83e8ae100b5ee33443183
