@@ -87,6 +87,12 @@ def is_lab_slot_booked(test_name, date, time):
         pass
     return False
 
+def get_available_lab_test_timings(name):
+    test = get_lab_test_by_name(name)
+    if test:
+        return test.get("timings")
+    return None
+
 # --- Lab test appointment routes ---
 # NOTE: You must ensure user_sessions is imported or passed from main.py
 # Replace all @app.route with @bp_lab.route

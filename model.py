@@ -192,7 +192,8 @@ extract_date_prompt = ChatPromptTemplate.from_messages([
 ])
 
 # Define missing prompt templates if not already defined
-from langchain.prompts import ChatPromptTemplate, SystemMessage, MessagesPlaceholder
+from langchain.schema.messages import SystemMessage
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 admission_prompt = ChatPromptTemplate.from_messages([
     SystemMessage(content="""
@@ -350,6 +351,21 @@ def detect_language(text):
     except Exception as e:
         print(f"An error occurred during language detection: {e}")
         return "Unknown"
+
+
+# Add this function after your other functions:
+
+def is_confirm(text):
+    """Check if text is a confirmation"""
+    try:
+        messages = [
+            HumanMessage(content=f"check:\n\n{text}")
+        ]
+        result = confirm_chain.invoke({"messages": messages})
+        return result.strip().lower() == 'true'
+    except Exception as e:
+        print(f"Error checking confirmation: {e}")
+        return False
 
 
 # Example usage

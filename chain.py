@@ -117,7 +117,7 @@ class MemoryManager:
     """Advanced memory management system with short-term, long-term, and episodic memory."""
 
     def __init__(self, persistence_file: str = "memory.json"):
-        self.short_term_memory = ConversationBufferMemory(k=5)
+        self.short_term_memory = ConversationBufferMemory(return_messages=True)
         self.long_term_memory = []
         self.episodic_memory = {}  # Key: session_id, Value: list of conversations
         self.current_session = str(uuid.uuid4())
